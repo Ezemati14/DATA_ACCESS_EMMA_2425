@@ -12,121 +12,83 @@ public class ContactManager {
         contacts = loadContacts();
     }
 
-    private List<Contact> loadContacts() {
-        List<Contact> contactList = new ArrayList<>();
-        File file = new File(FILE_NAME);
-        if (file.exists()) {
-            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
-                contactList = (List<Contact>) in.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                System.out.println("Error loading contacts: " + e.getMessage());
-            }
-        }
-        return contactList;
+    public void createContact() throws IOException {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Introduce el nombre:");
+        String name = sc.nextLine();
+
+        System.out.println("Introduce el apellido:");
+        String surname = sc.nextLine();
+
+        System.out.println("Introduce el e-mail:");
+        String email = sc.nextLine();
+
+        System.out.println("Introduce el número de teléfono:");
+        String phone = sc.nextLine();
+
+        System.out.println("Introduce la descripción:");
+        String description = sc.nextLine();
+
+        Contact contact = new Contact(name, surname, phone, email, description);
+        contacts.add(contact);
+        saveContacts();
+        System.out.println("Usuario crado cone exito");
     }
 
-    private void saveContacts() {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
-            out.writeObject(contacts);
-        } catch (IOException e) {
-            System.out.println("Error saving contacts: " + e.getMessage());
-        }
-    }
-
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-        return Pattern.matches(emailRegex, email);
-    }
-
-    private boolean isValidPhoneNumber(String phoneNumber) {
-        String phoneRegex = "^[0-9]{10}$";
-        return Pattern.matches(phoneRegex, phoneNumber);
-    }
-
-    public void addContact(String name, String surname, String email, String phoneNumber, String description) {
-        if (!isValidEmail(email)) {
-            System.out.println("Invalid email format. Please try again.");
-            return;
-        }
-
-        if (!isValidPhoneNumber(phoneNumber)) {
-            System.out.println("Invalid phone number format. Please use a 10-digit number.");
-            return;
-        }
-
-        contacts.add(new Contact(name, surname, email, phoneNumber, description));
-        System.out.println("Contact added successfully.");
-    }
-
-    public void showContacts() {
-        if (contacts.isEmpty()) {
-            System.out.println("No contacts found.");
-        } else {
+    public void showContacts(){
+        if(contacts.isEmpty()){
+            System.out.println("Lista de contactos vacia");
+        }else {
+            System.out.println("Lista de contactos: ");
+            //Con una variable Contact buscamos en la lista los contactos que existan
             for (Contact contact : contacts) {
                 System.out.println(contact);
-                System.out.println("------------------------");
+                System.out.println("-----------------------------");
             }
         }
     }
 
-    public void searchContact(String query) {
-        boolean found = false;
+    public void searchContact(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Nombre o numero de telefono: ");
+        String b = scanner.nextLine();
+
+        boolean encontrado = false;
         for (Contact contact : contacts) {
-            if (contact.getFullName().equalsIgnoreCase(query) || contact.getPhoneNumber().equals(query)) {
+            if(contact.getFullName().equals(b) || contact.getPhoneNumber().equals(b)) {
+                System.out.println("Contacto encontrado:");
                 System.out.println(contact);
-                found = true;
+                encontrado = true;
                 break;
             }
         }
-        if (!found) {
-            System.out.println("Contact not found.");
+        if (!encontrado) {
+            System.out.println("No se encontró ningún contacto con ese nombre o número de teléfono.");
+        }
+
+    }
+
+    public void saveContacts() throws IOException {
+        try(ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(new File(FILE_NAME)))) {
+            out.writeObject(contacts);
+        }catch (IOException e) {
+            System.out.println("Error al guardar los contactos: " + e.getMessage());
         }
     }
 
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
-        int option;
-        do {
-            System.out.println("\nContact Manager");
-            System.out.println("1. Add Contact");
-            System.out.println("2. Show Contacts");
-            System.out.println("3. Search Contact");
-            System.out.println("4. Exit");
-            System.out.print("Choose an option: ");
-            option = scanner.nextInt();
-            scanner.nextLine();
+    public List<Contact> loadContacts() {
+        File file = new File(FILE_NAME);
+        if(!file.exists()) {
+            //si no existe el archivo retorna una lista vacia
+            return new ArrayList<>();
+        }
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(FILE_NAME)))){
+            return (List<Contact>) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
-            switch (option) {
-                case 1:
-                    System.out.print("Enter name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Enter surname: ");
-                    String surname = scanner.nextLine();
-                    System.out.print("Enter email: ");
-                    String email = scanner.nextLine();
-                    System.out.print("Enter phone number: ");
-                    String phoneNumber = scanner.nextLine();
-                    System.out.print("Enter description: ");
-                    String description = scanner.nextLine();
-                    addContact(name, surname, email, phoneNumber, description);
-                    break;
-                case 2:
-                    showContacts();
-                    break;
-                case 3:
-                    System.out.print("Enter full name or phone number to search: ");
-                    String query = scanner.nextLine();
-                    searchContact(query);
-                    break;
-                case 4:
-                    saveContacts();
-                    System.out.println("Contacts saved. Exiting...");
-                    break;
-                default:
-                    System.out.println("Invalid option. Try again.");
-            }
-        } while (option != 4);
-        scanner.close();
     }
 
 
