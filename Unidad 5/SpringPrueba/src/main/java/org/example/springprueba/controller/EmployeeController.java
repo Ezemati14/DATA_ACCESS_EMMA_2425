@@ -28,6 +28,11 @@ public class EmployeeController {
     @Autowired
     private ServiceEmployees serviceEmp;
 
+    @GetMapping
+    public List<Employee> getEmployees() {
+        return (List<Employee>) empDao.findAll();
+    }
+
     @GetMapping("/employees")
     public List<Employee> buscarEmpleado(@RequestParam(name = "job", required = false) String job) {
         if(job == null || job.isEmpty()){

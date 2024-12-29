@@ -1,7 +1,5 @@
-package org.example.springprueba.model.entities;
+package org.example;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,8 +17,7 @@ public class Employee {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deptno")
-    @JsonIgnoreProperties("employee")
-    private Dept deptno;
+    private Department deptno;
 
     public Integer getId() {
         return id;
@@ -46,12 +43,8 @@ public class Employee {
         this.job = job;
     }
 
-    public Integer getDeptno() {
-        return deptno.getId();
-    }
+    public Department getDeptno() { return deptno; }
 
-    public void setDeptno(Dept deptno) {
-        this.deptno = deptno;
-    }
+    public void setDeptno(Department deptno) { this.deptno = deptno; }
 
 }
