@@ -26,20 +26,23 @@ public class SellersController {
         return sellersService.getAllSellers();
     }
 
-    @GetMapping("/{cif}")
-    public ResponseEntity<Seller> getSellerByCIF(@PathVariable("cif") String cif) {
-        Seller seller = sellersService.getSellerByCif(cif);
-
-        if(seller == null) {
-            return ResponseEntity.notFound().build();
+    @GetMapping("/search")
+    public ResponseEntity<Seller> getSellerByCifAndPassword(@RequestParam String cif, @RequestParam String plainPassword) {
+        //Pasamos por parametro el cif y el password
+        //Llamamos a la funcion del seller services
+        Seller seller = sellersService.findByCifAndPlainPassword(cif, plainPassword);
+        //Si es diferente de null, devuelve el seller
+        if(seller != null) {
+            return ResponseEntity.ok(seller);
         }
-        return ResponseEntity.ok(seller);
+        return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("seller/{id}")
-    public ResponseEntity<String> UpdateSeller(@Validated @PathVariable Integer id,
+    //Actualizar seller mediante un cif
+    @PutMapping("seller/{cif}")
+    public ResponseEntity<String> UpdateSeller(@Validated @PathVariable String cif,
                                                @RequestBody  SellerDTO sellerDTO) {
-       sellersService.updateSeller(id, sellerDTO);;
+       sellersService.updateSeller(cif, sellerDTO);;
        return ResponseEntity.ok("Seller updated successfully!");
     }
 
@@ -47,14 +50,33 @@ public class SellersController {
     public ResponseEntity<String> addSeller(@Valid @RequestBody SellerDTO sellerDTO) {
         try{
             Seller newSeller = sellersService.addSeller(sellerDTO);
-
             return ResponseEntity.status(HttpStatus.CREATED).body("Seller created with ID: " + newSeller.getSellerId());
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ERROR: " + e.getMessage());
         }
     }
 
-    @DeleteMapping("/seller/{id}")
+    /**@PutMapping("/sellers/{id}")
+    public ResponseEntity<Seller> updateSellerNotD(
+            @PathVariable Integer id,
+            @RequestBody Seller updatedSellerData) {
+        Seller updatedSeller = sellersService.updateSellerNotDto(id, updatedSellerData);
+        return ResponseEntity.ok(updatedSeller);
+    } **/
+
+    /**
+     * Funcion para obtener el usuaurio por cif
+     @GetMapping("/{cif}")
+     public ResponseEntity<Seller> getSellerByCIF(@PathVariable("cif") String cif) {
+     Seller seller = sellersService.getSellerByCif(cif);
+
+     if(seller == null) {
+     return ResponseEntity.notFound().build();
+     }
+     return ResponseEntity.ok(seller);
+     } **/
+
+   /** @DeleteMapping("/seller/{id}")
     public ResponseEntity<String> deleteSeller(@PathVariable Integer id) {
         boolean deleted = sellersService.deleteSeller(id);
         if(deleted) {
@@ -62,6 +84,5 @@ public class SellersController {
         }else {
             return ResponseEntity.notFound().build();
         }
-    }
-
+    } **/
 }

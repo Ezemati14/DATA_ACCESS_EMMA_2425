@@ -17,16 +17,18 @@ public class ProductsService {
     @Autowired
     private IProductsDAO productsDAO;
 
-    public List<ProductDTO> getAllProducts() {
-       List<Product> products = (List<Product>) productsDAO.findAll();
+    //Obtenemos todos los nombres de la tabla productos, usando una lista de string
+    public List<String> getAllProductsNames() {
+       return  productsDAO.findAllProductNames();
 
-       return products.stream()
+      /** Mapea productDTO y mostramos sus campos
+       * return products.stream()
                .map(ProductDTO::new)
-               .collect(Collectors.toList());
+               .collect(Collectors.toList()); **/
     }
 
-    public List<ProductDTO> getProductsByCategoryName(String categoryName) {
+   /** public List<ProductDTO> getProductsByCategoryName(String categoryName) {
         List<Product> products = productsDAO.findByCategory_CategoryName(categoryName);
         return products.stream().map(ProductDTO::new).collect(Collectors.toList());
-    }
+    } **/
 }

@@ -22,12 +22,20 @@ public class SellersService {
         return (List<Seller>) sellersDAO.findAll();
     }
 
-    public Seller getSellerByCif(String cif){
+    /**Obtener un seller mediante un cif
+     * public Seller getSellerByCif(String cif){
         return sellersDAO.findByCif(cif);
+    } **/
+
+    public Seller findByCifAndPlainPassword(String cif, String plainPassword) {
+        System.out.println("CIF: " + cif + " Password: " + plainPassword);
+        return sellersDAO.findByCifAndPlainPassword(cif, plainPassword)
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
     }
 
-    public void updateSeller(Integer id, SellerDTO sellerDTO) {
-       Seller seller = sellersDAO.findById(id)
+    /**Metdo para actualizar datos de un vendedor**/
+    public void updateSeller(String cif, SellerDTO sellerDTO) {
+       Seller seller = sellersDAO.findByCif(cif)
                .orElseThrow(() -> new RuntimeException("Seller not found"));;
 
        seller.setCif(sellerDTO.getCif());
@@ -42,6 +50,31 @@ public class SellersService {
 
        sellersDAO.save(seller);
     }
+
+   /** Funcion de actualizar seller sin usar DTO
+    * public void updateSellerNotDto(String cif, Seller seller) {
+        Seller existSeller = sellersDAO.findByCif(cif)
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+        if(seller.getCif() != null){
+            existSeller.setCif(seller.getCif());
+        }
+        if(seller.getName() != null){
+            existSeller.setName(seller.getName());
+        }
+        if(seller.getBusinessName() != null){
+            existSeller.setBusinessName(seller.getBusinessName());
+        }
+        if(seller.getPhone() != null){
+            existSeller.setPhone(seller.getPhone());
+        }
+        if(seller.getEmail() != null){
+            existSeller.setEmail(seller.getEmail());
+        }
+        if(seller.getPlainPassword() != null){
+            existSeller.setPlainPassword(seller.getPlainPassword());
+            existSeller.setPassword(encryptPassword(seller.getPlainPassword()));
+        }
+    } **/
 
     private String encryptPassword(String password) {
         try{
@@ -77,11 +110,11 @@ public class SellersService {
         return sellersDAO.save(seller);
     }
 
-    public boolean deleteSeller(int id){
+  /**  public boolean deleteSeller(int id){
         if(sellersDAO.existsById(id)){
             sellersDAO.deleteById(id);
             return true;
         }
         return false;
-    }
+    } **/
 }

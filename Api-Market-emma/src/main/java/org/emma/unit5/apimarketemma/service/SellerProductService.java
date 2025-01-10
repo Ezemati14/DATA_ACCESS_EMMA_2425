@@ -8,6 +8,8 @@ import org.emma.unit5.apimarketemma.model.entities.SellerProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +19,11 @@ public class SellerProductService {
     @Autowired
     ISellerProductDAO sellerProductDAO;
 
-    @Autowired
+    public List<BigDecimal> getSellerNamesByOfferDates(LocalDate startDate, LocalDate endDate) {
+        return sellerProductDAO.findOfferPriceByDates(startDate, endDate);
+    }
+
+   /** @Autowired
     ISellersDAO sellersDAO;
 
     public List<SellerProductDTO> getAllSellerProducts() {
@@ -36,5 +42,5 @@ public class SellerProductService {
         return sellerProducts.stream()
                 .map(SellerProductDTO::new)
                 .collect(Collectors.toList());
-    }
+    }**/
 }
