@@ -17,15 +17,16 @@ public class Employee {
     @Column(name = "job", length = 9)
     private String job;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "deptno")
-    @JsonIgnoreProperties("employee")
-    private Dept deptno;
+    private Dept dept;
 
+    //obtener
     public Integer getId() {
         return id;
     }
 
+    //establecer/colocar
     public void setId(Integer id) {
         this.id = id;
     }
@@ -46,12 +47,12 @@ public class Employee {
         this.job = job;
     }
 
-    public Integer getDeptno() {
-        return deptno.getId();
+    public Dept getDeptno() {
+        return dept;
     }
 
     public void setDeptno(Dept deptno) {
-        this.deptno = deptno;
+        this.dept = deptno;
     }
 
 }

@@ -23,7 +23,12 @@ public class SellerProductService {
         return sellerProductDAO.findOfferPriceByDates(startDate, endDate);
     }
 
-   /** @Autowired
+    //Sin usar el DAO, llamamos a findAll para obtener todos los datos
+    public List<SellerProduct> getAllSellerProducts() {
+        return (List<SellerProduct>) sellerProductDAO.findAll();
+    }
+
+    /** @Autowired
     ISellersDAO sellersDAO;
 
     public List<SellerProductDTO> getAllSellerProducts() {

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h1>Lista de empleados</h1>
+<a href="/"><button>Volver al Inicio</button></a>
+<!-- Tabla de empleados -->
+<table>
+    <thead>
+    <tr>
+        <th>Num empleado</th>
+        <th>Nombre</th>
+        <th>Trabajo</th>
+        <th>Departamento</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr th:each="emplo : ${employees}">
+        <td th:text="${emplo.id}"></td>
+        <td th:text="${emplo.ename}"></td>
+        <td th:text="${emplo.job}"></td>
+        <td th:text="${emplo.deptno != null ? emplo.deptno.dname : 'Sin Departamento'}"></td>
+        <td><a th:href="${'/verempleado?id='+emplo.id}">Detalles</a></td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+
+<h2>Liste de empleados diferente</h2>
+
+<select id="selectDepartamento" onchange="cambiarDepartamento()">
+    <option value="">Selecciona un departamento</option>
+    <option th:each="departamento : ${departamentos}"
+            th:value="${departamento.id}"
+            th:text="${departamento.dname}">
+    </option>
+</select>
+
+<script>
+    function cambiarDepartamento(){
+        var depno = document.getElementById("selectDepartamento").value;
+        window.location.href = "verempleados?depno=" + depno;
+    }
+</script>
+
+</body>
+</html>

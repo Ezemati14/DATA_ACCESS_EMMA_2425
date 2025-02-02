@@ -15,6 +15,11 @@ public class DeptController {
     @Autowired
     private IDeptDap deptDap;
 
+    @GetMapping()
+    public List<Dept> getEmployees() {
+        return  (List<Dept>) deptDap.findAll();
+    }
+
     @GetMapping("/depts")
     public List<Dept> getNameDepts(@RequestParam(name = "dname", required = false) String dname){
         if(dname == null || dname.isEmpty()){

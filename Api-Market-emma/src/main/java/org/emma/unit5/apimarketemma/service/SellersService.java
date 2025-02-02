@@ -76,7 +76,7 @@ public class SellersService {
         }
     } **/
 
-    private String encryptPassword(String password) {
+    public static String encryptPassword(String password) {
         try{
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(password.getBytes());

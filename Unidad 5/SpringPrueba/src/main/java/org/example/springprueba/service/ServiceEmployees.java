@@ -15,6 +15,27 @@ public class ServiceEmployees {
     @Autowired
     private IEmployeDao empDao;
 
+    public List<Employee> getAllEmployees() {
+        return (List<Employee>) empDao.findAll();
+    }
+
+    public List<Employee> searchEmployeesByName(String name) {
+        List<Employee> employees = empDao.findByEname(name);
+
+        if (employees.isEmpty()) {
+            throw new IllegalArgumentException("No existe empleados con el nombre " + name);
+        }
+
+        employees.forEach(employee -> {
+            if(employee.getDeptno() != null) {
+                employee.getDeptno().getId();
+                employee.getDeptno().getDname();
+                employee.getDeptno().getLoc();
+            }
+        });
+        return employees;
+    }
+
     public List<Employee> buscarEmpleado() {
             return (List<Employee>) empDao.findAll();
     }
@@ -25,10 +46,6 @@ public class ServiceEmployees {
 
     public List<Employee> buscarEmpPorTrabajo(String lastName) {
         return empDao.findByJobContainsIgnoreCase(lastName);
-    }
-
-    public Optional<Employee> empleadoPorId(int id) {
-       return empDao.findById(id);
     }
 
     public Employee saveEmpl(Employee emp) {

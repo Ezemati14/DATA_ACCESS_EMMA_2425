@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container">
+            <h1>Welcome, <span th:text="${seller.name}"></span>!</h1>
+        <a href="http://localhost:8080/offer">Ir a la Página de Ofertas</a>
+
+        <form id="updateForm" th:action="@{/welcome}" th:object="${seller}" method="post">
+            <div>
+                <label for="cif">CIF:</label>
+                <input type="text" id="cif" th:value="${seller.cif}" disabled>
+                <input type="hidden" name="cif" th:value="${seller.cif}">
+            </div>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" th:field="${seller.name}">
+                <p class="error" th:if="${#fields.hasErrors('name')}" th:errors="${seller.name}"></p>
+            </div>
+            <div>
+                <label for="businessName">Business Name:</label>
+                <input type="text" id="businessName" th:field="${seller.businessName}">
+                <p class="error" th:if="${#fields.hasErrors('businessName')}" th:errors="${seller.businessName}"></p>
+
+            </div>
+            <div>
+                <label for="phone">Phone:</label>
+                <input type="text" id="phone" th:field="${seller.phone}">
+                <p class="error" th:if="${#fields.hasErrors('phone')}" th:errors="${seller.phone}"></p>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" th:field="${seller.email}">
+                <p class="error" th:if="${#fields.hasErrors('email')}" th:errors="${seller.email}"></p>
+            </div>
+            <div>
+                <label for="url">URL:</label>
+                <input type="text" id="url" th:field="${seller.url}">
+                <p class="error" th:if="${#fields.hasErrors('url')}" th:errors="${seller.url}"></p>
+            </div>
+            <div>
+                <label for="pro">Pro:</label>
+                <input type="checkbox" id="pro" th:field="${seller.pro}">
+            </div>
+            <div>
+                <label for="plainPassword">New Password:</label>
+                <input type="password" id="plainPassword" name="plainPassword" placeholder="Nueva contraseña (opcional)">
+                <button type="button" onclick="togglePassword()" style="margin-left: 5px;">👁️</button>
+            </div>
+
+            <button id="submitButton" type="submit" onclick="return confirmUpdate()" disabled>Save Changes</button>
+        </form>
+
+        <div th:if="${dateMessage}">
+            <p style="color: green;" th:text="${dateMessage}"></p>
+        </div>
+
+        <div th:if="${successMessage}" style="color: green;">
+            <p th:text="${successMessage}"></p>
+        </div>
+
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar Sesión</button>
+        </form>
+    </div>
+
+<script>
+
+    function togglePassword() {
+        var passwordInput = document.getElementById("plainPassword");
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+        } else {
+            passwordInput.type = "password";
+        }
+    }
+
+    function confirmUpdate() {
+        const confirmation = confirm("Esta seguro que quiere cambiar los datos?");
+        return confirmation;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("updateForm");
+        const button = document.getElementById("submitButton");
+
+        const initialValues = {};
+        Array.from(form.elements).forEach(input => {
+            if (input.type !== "submit" && input.type !== "hidden") {
+                if (input.type === "checkbox") {
+                    initialValues[input.name] = input.checked; // Guardar estado del checkbox
+                } else {
+                    initialValues[input.name] = input.value; // Guardar valor del input
+                }
+            }
+        });
+        function checkForChanges() {
+            let hasChanged = false;
+            Array.from(form.elements).forEach(input => {
+                if (input.type !== "submit" && input.type !== "hidden") {
+                    if (input.type === "checkbox") {
+                        if (input.checked !== initialValues[input.name]) {
+                            hasChanged = true;
+                        }
+                    } else {
+                        if (input.value !== initialValues[input.name]) {
+                            hasChanged = true;
+                        }
+                    }
+                }
+            });
+            button.disabled = !hasChanged;
+        }
+        form.addEventListener("input", checkForChanges);
+
+        window.confirmUpdate = function () {
+            return confirm("Are you sure you want to save the changes?");
+        };
+    });
+</script>
+
+</body>
+</html>

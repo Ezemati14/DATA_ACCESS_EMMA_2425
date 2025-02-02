@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Departamento</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<h1>CREAR NUEVO DEPARTAMENTO</h1>
+<a href="/"><button>Volver al Inicio</button></a>
+
+<!--Si tenemos un error, se pinta este error. Si no se queda oculto-->
+<div style="color: red;">
+    <p th:if="${errorDepartamento}" th:text="${errorDepartamento}"></p>
+</div>
+
+<form action="#" th:action="@{/altadepartamento}" th:object="${dept}" method="post">
+    <div class="form-group">
+        <label for="id">ID:</label>
+        <input type="number" id="id" name="id" required>
+    </div>
+
+    <div class="form-group">
+        <label for="dname">Nombre:</label>
+        <input type="text" id="dname" name="dname" required>
+    </div>
+
+    <div class="form-group">
+        <label for="loc">Ubicación:</label>
+        <input type="text" id="loc" name="loc" required>
+    </div>
+
+    <div>
+        <button type="submit">Crear Departamento</button>
+    </div>
+
+</form>
+
+</body>
+</html>

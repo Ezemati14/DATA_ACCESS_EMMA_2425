@@ -19,6 +19,11 @@ public class SellerProductController {
     @Autowired
     private SellerProductService sellerProductService;
 
+    @GetMapping
+    public List<SellerProduct> getAllSellerProducts() {
+       return sellerProductService.getAllSellerProducts();
+    }
+
     @GetMapping("/offer-date")
     public List<BigDecimal> getOfferDate(
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,

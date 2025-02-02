@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Página de Ofertas</title>
+    <link rel="stylesheet" href="./offer.css">
+</head>
+<body>
+<div class="container">
+    <h1>Pagina de Ofertas</h1>
+    <a href="http://localhost:8080/welcome">Volver a Welcome</a>
+</div>
+
+<form id="offerForm" action="/create-offer" method="POST">
+    <label for="productDropdown">Selecciona un producto:</label>
+    <select id="productDropdown" name="productId">
+        <option value="" disabled selected>Selecciona un producto</option>
+        <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.productName}"></option>
+    </select>
+
+    <label for="startDate">Fecha de Inicio:</label>
+    <input type="date" id="startDate" name="offerStartDate" required />
+
+    <label for="endDate">Fecha de Fin:</label>
+    <input type="date" id="endDate" name="offerEndDate" required />
+
+    <label for="offerPrice">Precio de Oferta:</label>
+    <input type="number" id="offerPrice" name="offerPrice" step="0.01" placeholder="Precio con descuento" required />
+
+    <button type="submit">Crear Oferta</button>
+
+</form>
+
+<script>
+    document.getElementById('offerForm').addEventListener('submit', function (event) {
+        const startDate = new Date(document.getElementById('startDate').value);
+        const endDate = new Date(document.getElementById('endDate').value);
+        const diffTime = Math.abs(endDate - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        let maxDiscount;
+        if (diffDays === 1) maxDiscount = 50;
+        else if (diffDays <= 3) maxDiscount = 30;
+        else if (diffDays <= 7) maxDiscount = 20;
+        else if (diffDays <= 15) maxDiscount = 15;
+        else if (diffDays <= 30) maxDiscount = 10;
+        else {
+            alert('El periodo no puede exceder los 30 días.');
+            event.preventDefault();
+            return;
+        }
+
+        const offerPrice = parseFloat(document.getElementById('offerPrice').value);
+        const originalPrice = parseFloat(document.getElementById('productDropdown').selectedOptions[0].getAttribute('data-price'));
+        const discount = ((originalPrice - offerPrice) / originalPrice) * 100;
+
+        if (discount > maxDiscount) {
+            alert(`El descuento máximo permitido para ${diffDays} días es del ${maxDiscount}%.`);
+            event.preventDefault();
+        }
+    });
+</script>
+
+</body>
+</html>

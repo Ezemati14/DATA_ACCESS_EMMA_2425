@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+            <h1>Detalles del Empleado</h1>
+
+            <div th:if="${empleado != null}">
+                <p>ID: <span th:text="${empleado.id}"></span></p>
+                <p>Nombre: <span th:text="${empleado.ename}"></span></p>
+                <p>Trabajo: <span th:text="${empleado.job}"></span></p>
+                <p>Departamento: <span th:text="${empleado.deptno.dname}"></span></p>
+            </div>
+
+            <div th:if="${empleado == null}">
+                <p th:text="${mensaje}"></p>
+            </div>
+
+            <a href="/verempleados">Volver a la lista</a>
+            <a href="/"><button>Volver al Inicio</button></a>
+</body>
+</html>

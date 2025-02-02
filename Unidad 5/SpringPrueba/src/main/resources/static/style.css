@@ -1,0 +1,69 @@
+/* Estilos generales para centrar el formulario */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9; /* Fondo claro para contraste */
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Contenedor del formulario */
+form {
+    background-color: #ffffff; /* Fondo blanco */
+    border: 1px solid #ddd; /* Borde suave */
+    border-radius: 8px; /* Esquinas redondeadas */
+    padding: 20px 30px; /* Espaciado interno */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    width: 100%;
+    max-width: 400px; /* Ancho máximo */
+}
+
+/* Estilo de los labels */
+form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333; /* Texto oscuro */
+}
+
+/* Estilo de los inputs */
+form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc; /* Borde suave */
+    border-radius: 4px; /* Esquinas redondeadas */
+    font-size: 14px;
+    box-sizing: border-box; /* Incluye padding en el ancho */
+}
+
+/* Cambiar estilo de los inputs al hacer focus */
+form input:focus {
+    border-color: #007bff; /* Azul al enfocar */
+    outline: none; /* Sin contorno adicional */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Resaltado sutil */
+}
+
+/* Estilo del botón */
+form button {
+    background-color: #007bff; /* Azul bonito */
+    color: #fff; /* Texto blanco */
+    border: none; /* Sin bordes */
+    padding: 10px 15px; /* Espaciado */
+    border-radius: 4px; /* Esquinas redondeadas */
+    font-size: 16px; /* Tamaño de fuente */
+    cursor: pointer; /* Cursor de mano */
+    transition: background-color 0.3s ease; /* Transición suave */
+}
+
+/* Cambiar el color del botón al pasar el cursor */
+form button:hover {
+    background-color: #0056b3; /* Azul más oscuro */
+}
+
+/* Centrar texto dentro de divs */
+form div {
+    text-align: center;
+}

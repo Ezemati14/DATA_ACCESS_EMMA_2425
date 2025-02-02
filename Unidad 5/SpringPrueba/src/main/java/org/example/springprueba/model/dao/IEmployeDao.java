@@ -10,5 +10,12 @@ import java.util.List;
 public interface IEmployeDao extends CrudRepository<Employee, Integer> {
 
     //Este metodo ignora mayus y minisculas
+    //encuentra por
     List<Employee> findByJobContainsIgnoreCase(String lastName);
+    //buscar por nombre
+    List<Employee> findByEname(String ename);
+
+    List<Employee> findAll();
+
+    List<Employee> findByDept_Id(Integer deptno);
 }
