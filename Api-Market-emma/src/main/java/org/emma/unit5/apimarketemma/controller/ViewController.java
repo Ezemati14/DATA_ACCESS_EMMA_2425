@@ -10,18 +10,21 @@ import org.emma.unit5.apimarketemma.model.entities.SellerProduct;
 import org.emma.unit5.apimarketemma.service.SellersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -97,6 +100,7 @@ public class ViewController {
             }
             sellersDAO.save(existingSeller); // Guarda los cambios
             redirectAttributes.addFlashAttribute("dateMessage", "Datos actualizados correctamente.");
+            return "redirect:/welcome";
         }
         return "welcome";
     }
@@ -111,46 +115,71 @@ public class ViewController {
     @GetMapping("/offer")
     public String showOfferPage(Model model) {
         List<Product> products = (List<Product>) productsDAO.findAll();
+        Map<Integer, BigDecimal> productPrices = new HashMap<>();
+
+        for (Product product : products) {
+            List<SellerProduct> sellerProducts = sellerProductDAO.findByProduct(product);
+            if (!sellerProducts.isEmpty()) {
+                SellerProduct sellerProduct = sellerProducts.get(0); // Usamos el primero
+                productPrices.put(product.getId(), sellerProduct.getPrice());
+            }
+        }
+
         model.addAttribute("products", products);
+        model.addAttribute("productPrices", productPrices);  // Pasar precios a la vista
+
         return "offer";
     }
 
     @PostMapping("/create-offer")
-    public ResponseEntity<?> createOffer(@RequestParam Integer productId,
-                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate offerStartDate,
-                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate offerEndDate,
-                                         @RequestParam BigDecimal offerPrice) {
-        // Validar que no haya otra oferta en el mismo periodo
+    public Object createOffer(
+            @RequestParam Integer productId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate offerStartDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate offerEndDate, RedirectAttributes redirectAttributes) {
+
+        SellerProduct sellerProduct = sellerProductDAO.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para crear una oferta.");
+        }
+
         boolean conflict = sellerProductDAO.existsByProductIdAndOfferPeriod(productId, offerStartDate, offerEndDate);
         if (conflict) {
-            return ResponseEntity.badRequest().body("Ya existe una oferta para este producto en el periodo seleccionado.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Ya existe una oferta para este producto en el periodo seleccionado.");
+            return "redirect:/offer";
+            //return ResponseEntity.badRequest().body("Ya existe una oferta para este producto en el periodo seleccionado.");
         }
 
-        // Validar descuentos
+        BigDecimal originalPrice = sellerProduct.getPrice();
         long days = ChronoUnit.DAYS.between(offerStartDate, offerEndDate) + 1;
-        BigDecimal originalPrice = sellerProductDAO.findById(productId).orElseThrow().getPrice();
-        BigDecimal maxDiscount;
-        if (days == 1) maxDiscount = originalPrice.multiply(BigDecimal.valueOf(0.5));
-        else if (days <= 3) maxDiscount = originalPrice.multiply(BigDecimal.valueOf(0.3));
-        else if (days <= 7) maxDiscount = originalPrice.multiply(BigDecimal.valueOf(0.2));
-        else if (days <= 15) maxDiscount = originalPrice.multiply(BigDecimal.valueOf(0.15));
-        else if (days <= 30) maxDiscount = originalPrice.multiply(BigDecimal.valueOf(0.1));
+
+        // Determinar el porcentaje de descuento
+        BigDecimal discountPercentage;
+        if (days == 1) discountPercentage = BigDecimal.valueOf(0.50);  // 50%
+        else if (days <= 3) discountPercentage = BigDecimal.valueOf(0.30); // 30%
+        else if (days <= 7) discountPercentage = BigDecimal.valueOf(0.20); // 20%
+        else if (days <= 15) discountPercentage = BigDecimal.valueOf(0.15); // 15%
+        else if (days <= 30) discountPercentage = BigDecimal.valueOf(0.10); // 10%
         else {
-            return ResponseEntity.badRequest().body("El periodo no puede exceder los 30 días.");
-        }
+            redirectAttributes.addFlashAttribute("errorMessage", "El periodo no puede exceder los 30 días.");
+            return "redirect:/offer"; }
+        // else return ResponseEntity.badRequest().body("El periodo no puede exceder los 30 días.");
 
-        if (offerPrice.compareTo(originalPrice.subtract(maxDiscount)) < 0) {
-            return ResponseEntity.badRequest().body("El precio de oferta excede el descuento permitido.");
-        }
 
-        // Crear la oferta
-        SellerProduct sellerProduct = new SellerProduct();
-        sellerProduct.setProduct(sellerProductDAO.findById(productId).orElseThrow().getProduct());
+        // Aplicar el descuento
+        BigDecimal offerPrice = originalPrice.multiply(BigDecimal.ONE.subtract(discountPercentage));
+
+        // Guardar los valores en la BD
         sellerProduct.setOfferStartDate(offerStartDate);
         sellerProduct.setOfferEndDate(offerEndDate);
         sellerProduct.setOfferPrice(offerPrice);
-        sellerProductDAO.save(sellerProduct);
 
-        return ResponseEntity.ok("Oferta creada con éxito.");
+        sellerProductDAO.save(sellerProduct);
+        redirectAttributes.addFlashAttribute("successMessage", "Oferta creada con éxito. Precio con descuento: " + offerPrice);
+        return "redirect:/offer";
+        //return ResponseEntity.ok("Oferta creada con éxito. Precio con descuento: " + offerPrice);
     }
 }

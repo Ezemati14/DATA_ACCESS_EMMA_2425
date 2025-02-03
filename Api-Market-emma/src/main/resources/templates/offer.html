@@ -2,19 +2,32 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Página de Ofertas</title>
-    <link rel="stylesheet" href="./offer.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <div class="container">
     <h1>Pagina de Ofertas</h1>
-    <a href="http://localhost:8080/welcome">Volver a Welcome</a>
+    <a th:href="@{/welcome}">Volver a Welcome</a>
 </div>
 
 <form id="offerForm" action="/create-offer" method="POST">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+    <div th:if="${errorMessage}">
+        <p style="color: red;" th:text="${errorMessage}"></p>
+    </div>
+
+    <p th:if="${successMessage}" style="color: green;" th:text="${successMessage}"></p>
+
     <label for="productDropdown">Selecciona un producto:</label>
+
     <select id="productDropdown" name="productId">
         <option value="" disabled selected>Selecciona un producto</option>
-        <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.productName}"></option>
+        <option th:each="product : ${products}"
+                th:value="${product.id}"
+                th:attr="data-price=${productPrices[product.id]}"
+                th:text="${product.productName}">
+            </option>
     </select>
 
     <label for="startDate">Fecha de Inicio:</label>
@@ -23,40 +36,73 @@
     <label for="endDate">Fecha de Fin:</label>
     <input type="date" id="endDate" name="offerEndDate" required />
 
-    <label for="offerPrice">Precio de Oferta:</label>
-    <input type="number" id="offerPrice" name="offerPrice" step="0.01" placeholder="Precio con descuento" required />
+    <p>Precio con descuento: <span id="calculatedOfferPrice">-</span>€</p>
 
     <button type="submit">Crear Oferta</button>
 
 </form>
 
 <script>
-    document.getElementById('offerForm').addEventListener('submit', function (event) {
-        const startDate = new Date(document.getElementById('startDate').value);
-        const endDate = new Date(document.getElementById('endDate').value);
-        const diffTime = Math.abs(endDate - startDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    document.addEventListener("DOMContentLoaded", function () {
+        const productDropdown = document.getElementById("productDropdown");
+        const startDateInput = document.getElementById("startDate");
+        const endDateInput = document.getElementById("endDate");
+        const calculatedOfferPrice = document.getElementById("calculatedOfferPrice");
+        const messageContainer = document.getElementById("messageContainer");
 
-        let maxDiscount;
-        if (diffDays === 1) maxDiscount = 50;
-        else if (diffDays <= 3) maxDiscount = 30;
-        else if (diffDays <= 7) maxDiscount = 20;
-        else if (diffDays <= 15) maxDiscount = 15;
-        else if (diffDays <= 30) maxDiscount = 10;
-        else {
-            alert('El periodo no puede exceder los 30 días.');
-            event.preventDefault();
-            return;
+        function calculateDiscountedPrice() {
+            const selectedProduct = productDropdown.selectedOptions[0]; // Producto seleccionado
+            if (!selectedProduct || !startDateInput.value || !endDateInput.value) {
+                calculatedOfferPrice.textContent = "-";
+                return;
+            }
+
+            const originalPrice = parseFloat(selectedProduct.getAttribute("data-price")); // Precio original del producto
+            if (isNaN(originalPrice)) {
+                calculatedOfferPrice.textContent = "-";
+                return;
+            }
+
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            const timeDiff = endDate - startDate;
+            const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1; // Calcula días incluyendo el último día
+
+            let discountPercentage;
+            if (days === 1) discountPercentage = 50;
+            else if (days <= 3) discountPercentage = 30;
+            else if (days <= 7) discountPercentage = 20;
+            else if (days <= 15) discountPercentage = 15;
+            else if (days <= 30) discountPercentage = 10;
+            else {
+                //calculatedOfferPrice.textContent = "Error: Máximo 30 días";
+                messageContainer.textContent = "Error: Máximo 30 días";
+                return;
+            }
+
+            const discountAmount = (originalPrice * discountPercentage) / 100;
+            const offerPrice = (originalPrice - discountAmount).toFixed(2); // Aplica el descuento y redondea a 2 decimales
+
+            calculatedOfferPrice.textContent = offerPrice + "€"; // Muestra el precio con descuento
         }
 
-        const offerPrice = parseFloat(document.getElementById('offerPrice').value);
-        const originalPrice = parseFloat(document.getElementById('productDropdown').selectedOptions[0].getAttribute('data-price'));
-        const discount = ((originalPrice - offerPrice) / originalPrice) * 100;
+        startDateInput.addEventListener("change", function () {
+            if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                endDateInput.value = startDateInput.value; // Ajustar la fecha de fin si es menor
+            }
+            endDateInput.min = startDateInput.value; // Restringir fechas menores en fecha fin
+        });
 
-        if (discount > maxDiscount) {
-            alert(`El descuento máximo permitido para ${diffDays} días es del ${maxDiscount}%.`);
-            event.preventDefault();
-        }
+        endDateInput.addEventListener("change", function () {
+            if (endDateInput.value < startDateInput.value) {
+                messageContainer.textContent = "La fecha de fin no puede ser anterior a la fecha de inicio.";
+                endDateInput.value = startDateInput.value; // Reajustar si es inválida
+            }
+        });
+
+        productDropdown.addEventListener("change", calculateDiscountedPrice);
+        startDateInput.addEventListener("input", calculateDiscountedPrice);
+        endDateInput.addEventListener("input", calculateDiscountedPrice);
     });
 </script>
 

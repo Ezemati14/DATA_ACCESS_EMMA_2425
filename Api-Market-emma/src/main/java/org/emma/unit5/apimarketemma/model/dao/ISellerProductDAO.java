@@ -1,5 +1,6 @@
 package org.emma.unit5.apimarketemma.model.dao;
 
+import org.emma.unit5.apimarketemma.model.entities.Product;
 import org.emma.unit5.apimarketemma.model.entities.Seller;
 import org.emma.unit5.apimarketemma.model.entities.SellerProduct;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,8 @@ public interface ISellerProductDAO extends CrudRepository<SellerProduct, Integer
 
     //Obtener todos los sellerProduct
     //List<SellerProduct> findAll();
+
+    List<SellerProduct> findByProduct(Product product);
 
     @Query("SELECT sp.offerPrice " +
             "FROM SellerProduct sp " +

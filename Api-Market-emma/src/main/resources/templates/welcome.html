@@ -8,7 +8,7 @@
 <body>
     <div class="container">
             <h1>Welcome, <span th:text="${seller.name}"></span>!</h1>
-        <a href="http://localhost:8080/offer">Ir a la Página de Ofertas</a>
+        <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
 
         <form id="updateForm" th:action="@{/welcome}" th:object="${seller}" method="post">
             <div>
