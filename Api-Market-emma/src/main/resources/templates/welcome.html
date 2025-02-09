@@ -9,6 +9,7 @@
     <div class="container">
             <h1>Welcome, <span th:text="${seller.name}"></span>!</h1>
         <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
+        <a th:href="@{/addproduct}">Ir a la Página de Productos</a>
 
         <form id="updateForm" th:action="@{/welcome}" th:object="${seller}" method="post">
             <div>
@@ -25,7 +26,6 @@
                 <label for="businessName">Business Name:</label>
                 <input type="text" id="businessName" th:field="${seller.businessName}">
                 <p class="error" th:if="${#fields.hasErrors('businessName')}" th:errors="${seller.businessName}"></p>
-
             </div>
             <div>
                 <label for="phone">Phone:</label>

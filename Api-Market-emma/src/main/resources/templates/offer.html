@@ -8,6 +8,7 @@
 <div class="container">
     <h1>Pagina de Ofertas</h1>
     <a th:href="@{/welcome}">Volver a Welcome</a>
+    <a th:href="@{/addproduct}">Ir a la Página de Productos</a>
 </div>
 
 <form id="offerForm" action="/create-offer" method="POST">
@@ -24,8 +25,8 @@
     <select id="productDropdown" name="productId">
         <option value="" disabled selected>Selecciona un producto</option>
         <option th:each="product : ${products}"
-                th:value="${product.id}"
-                th:attr="data-price=${productPrices[product.id]}"
+                th:value="${product.productId}"
+                th:attr="data-price=${productPrices[product.productId]}"
                 th:text="${product.productName}">
             </option>
     </select>

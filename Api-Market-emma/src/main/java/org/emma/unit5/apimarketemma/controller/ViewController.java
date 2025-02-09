@@ -1,12 +1,15 @@
 package org.emma.unit5.apimarketemma.controller;
 
 import jakarta.servlet.http.HttpSession;
+import org.emma.unit5.apimarketemma.model.dao.ICategorysDAO;
 import org.emma.unit5.apimarketemma.model.dao.IProductsDAO;
 import org.emma.unit5.apimarketemma.model.dao.ISellerProductDAO;
 import org.emma.unit5.apimarketemma.model.dao.ISellersDAO;
+import org.emma.unit5.apimarketemma.model.entities.Category;
 import org.emma.unit5.apimarketemma.model.entities.Product;
 import org.emma.unit5.apimarketemma.model.entities.Seller;
 import org.emma.unit5.apimarketemma.model.entities.SellerProduct;
+import org.emma.unit5.apimarketemma.service.ProductsService;
 import org.emma.unit5.apimarketemma.service.SellersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 public class ViewController {
@@ -36,6 +37,10 @@ public class ViewController {
     private IProductsDAO productsDAO;
     @Autowired
     private ISellerProductDAO sellerProductDAO;
+    @Autowired
+    private ICategorysDAO categorysDAO;
+    @Autowired
+    private ProductsService productService;
 
     /** ******************************* PAGINA DE LOGIN ************************************* **/
 
@@ -114,19 +119,26 @@ public class ViewController {
 
     @GetMapping("/offer")
     public String showOfferPage(Model model) {
-        List<Product> products = (List<Product>) productsDAO.findAll();
+        //Obtenemos el cif del vendedor autenticado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String sellerCif = authentication.getName();
+
+        List<SellerProduct> sellerProducts = sellerProductDAO.findBySellerCif(sellerCif);
+        //Nos devuelve los productos que el vendedor tiene disponible con la consulta creada en el sellerProductDAO
+        //List<SellerProduct> sellerProducts1 = sellerProductDAO.findProductsBySellerCif(sellerCif);
+
+        List<Product> products = new ArrayList<>();
         Map<Integer, BigDecimal> productPrices = new HashMap<>();
 
-        for (Product product : products) {
-            List<SellerProduct> sellerProducts = sellerProductDAO.findByProduct(product);
-            if (!sellerProducts.isEmpty()) {
-                SellerProduct sellerProduct = sellerProducts.get(0); // Usamos el primero
-                productPrices.put(product.getId(), sellerProduct.getPrice());
-            }
+        for (SellerProduct sellerProduct : sellerProducts) {
+            Product product = sellerProduct.getProduct();
+            products.add(product);
+            productPrices.put(product.getProductId(), sellerProduct.getPrice());
         }
 
+        // Pasar los datos al modelo
         model.addAttribute("products", products);
-        model.addAttribute("productPrices", productPrices);  // Pasar precios a la vista
+        model.addAttribute("productPrices", productPrices);
 
         return "offer";
     }
@@ -182,4 +194,49 @@ public class ViewController {
         return "redirect:/offer";
         //return ResponseEntity.ok("Oferta creada con éxito. Precio con descuento: " + offerPrice);
     }
+
+    /** ******************************* PAGINA DE PRODUCTOS ************************************* **/
+
+    @GetMapping("/addproduct")
+    public String showAddProductPage(Model model) {
+        // Obtener todas las categorías
+        List<Category> categories = categorysDAO.findAll();
+        model.addAttribute("categories", categories);
+
+        String cif = getAuthenticatedUserCif();
+        Optional<Seller> seller = sellersDAO.findByCif(cif);
+        seller.ifPresent(s -> model.addAttribute("seller", s));
+
+        return "addproduct";
+    }
+    private String getAuthenticatedUserCif() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            return authentication.getName();
+        }
+        return null;
+    }
+
+    @PostMapping("/addproduct/save")
+    public String saveSellerProduct(
+            @RequestParam String cif,
+            @RequestParam Integer productId,
+            @RequestParam Integer stock,
+            @RequestParam BigDecimal price,
+            RedirectAttributes redirectAttributes) {
+
+        productService.addProductToSeller(cif, productId, stock, price);
+        redirectAttributes.addFlashAttribute("successMessage", "Producto agregado correctamente");
+        return "redirect:/addproduct";
+    }
+
+    @GetMapping("/addproduct/{category}/{cif}")
+    @ResponseBody
+    public List<Product> getMissingProducts(@PathVariable String category, @PathVariable String cif) {
+        return productService.getMissingProducts(category, cif);
+    }
 }
+
+
+
+

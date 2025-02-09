@@ -12,12 +12,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ISellerProductDAO extends CrudRepository<SellerProduct, Integer> {
-    List<SellerProduct> findBySeller(Seller seller);
-
-    //Obtener todos los sellerProduct
-    //List<SellerProduct> findAll();
-
-    List<SellerProduct> findByProduct(Product product);
 
     @Query("SELECT sp.offerPrice " +
             "FROM SellerProduct sp " +
@@ -33,4 +27,16 @@ public interface ISellerProductDAO extends CrudRepository<SellerProduct, Integer
     boolean existsByProductIdAndOfferPeriod(@Param("productId") Integer productId,
                                             @Param("offerStartDate") LocalDate offerStartDate,
                                             @Param("offerEndDate") LocalDate offerEndDate);
+
+    List<SellerProduct> findBySellerCif(String sellerCif);
+
+    //Obtenemos solo los productos del vendedro autenticado
+   /** @Query(
+            value = "SELECT p.* FROM products p " +
+                    "JOIN seller_products sp ON p.product_id = sp.product_id " +
+                    "JOIN sellers s ON sp.seller_id = s.seller_id " +
+                    "WHERE s.cif = :sellerCif",
+            nativeQuery = true
+    )
+    List<Product> findProductsBySellerCif(@Param("sellerCif") String sellerCif);**/
 }

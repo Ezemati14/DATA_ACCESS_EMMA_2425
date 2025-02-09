@@ -8,7 +8,7 @@ public class ProductDTO {
     private String categoryName;
 
     public ProductDTO(Product product) {
-        this.id = product.getId();
+        this.id = product.getProductId();
         this.productName = product.getProductName();
         this.categoryName = product.getCategory()  != null ? product.getCategory().getCategoryName() : null;
     }

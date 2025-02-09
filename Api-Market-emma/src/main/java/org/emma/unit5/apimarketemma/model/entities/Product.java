@@ -5,10 +5,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.emma.unit5.apimarketemma.model.dto.ProductDTO;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "products")
+@NamedNativeQuery(
+        name = "Product.findMissingProductsBySellerAndCategory",
+        query = "SELECT p.product_id, p.product_name, p.description, p.active, p.category_id " +
+                "FROM products p " +
+                "JOIN categories c ON p.category_id = c.category_id " +
+                "WHERE c.category_name = :categoryName " +
+                "AND p.product_id NOT IN ( " +
+                "    SELECT sp.product_id " +
+                "    FROM seller_products sp " +
+                "    JOIN sellers s ON sp.seller_id = s.seller_id " +
+                "    WHERE s.cif = :sellerCif " +
+                ")",
+        resultClass = Product.class
+)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "products_id_gen")
@@ -34,7 +49,7 @@ public class Product {
     @Column(name = "active", nullable = false)
     private Boolean active = false;
 
-    public Integer getId() {
+    public Integer getProductId() {
         return id;
     }
 

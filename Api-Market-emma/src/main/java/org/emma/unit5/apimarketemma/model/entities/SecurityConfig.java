@@ -64,6 +64,7 @@ public class SecurityConfig {
                         // free access to login page
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/create-offer").hasRole("SELLER")
+                        .requestMatchers("/addproduct").hasRole("SELLER")
                         // Any other request must be authenticated
                         .anyRequest().authenticated()
                 )

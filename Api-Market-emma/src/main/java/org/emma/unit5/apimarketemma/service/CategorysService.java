@@ -14,6 +14,10 @@ public class CategorysService {
     private ICategorysDAO categorysDAO;
 
     public List<Category> getAllCategories() {
-        return (List<Category>) categorysDAO.findAll();
+        return categorysDAO.findAll();
     }
+
+    public List<String> getAllCategoryNames() {
+        return categorysDAO.findAllCategoryName();
+    };
 }

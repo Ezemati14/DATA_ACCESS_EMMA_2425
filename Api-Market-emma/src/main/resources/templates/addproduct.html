@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Añadir Producto</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Bienvenido, <span th:text="${seller.name}"></span>!</h1>
+    <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
+    <a th:href="@{/welcome}">Ir a la Página de Inicio</a>
+
+    <!-- Formulario con método POST usando la clase existente -->
+    <form id="addProductForm" th:action="@{/addproduct/save}" th:object="${sellerProduct}" method="POST">
+        <input type="hidden" name="cif" th:value="${seller.cif}">
+
+        <label for="categorySelect">Seleccione una Categoría:</label>
+        <select id="categorySelect">
+            <option value="">Seleccione una categoría</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.categoryName}"
+                    th:text="${category.categoryName}">
+            </option>
+        </select>
+
+        <br><br>
+
+        <label for="productSelect">Seleccione un Producto:</label>
+        <select id="productSelect" name="productId" required disabled>
+            <option value="">Seleccione un producto</option>
+        </select>
+
+        <br><br>
+
+        <label for="stockInput">Stock (máx. 20):</label>
+        <input type="number" id="stockInput" name="stock" min="1" max="20" value="1" required>
+
+        <br><br>
+
+        <label for="priceInput">Precio:</label>
+        <input type="number" id="priceInput" name="price" min="1" step="1.00" required>
+
+        <br><br>
+
+        <button id="addProductButton" type="submit" disabled>Añadir Producto</button>
+    </form>
+
+    <p th:if="${successMessage}" style="color: green;" th:text="${successMessage}"></p>
+    <script>
+        $(document).ready(function () {
+            let cif = "[[${seller.cif}]]";
+
+            function checkButtonState() {
+                let isProductSelected = $("#productSelect").val() !== "";
+                let stockValid = $("#stockInput").val() >= 1 && $("#stockInput").val() <= 20;
+                let priceValid = $("#priceInput").val() > 0;
+
+                $("#addProductButton").prop("disabled", !(isProductSelected && stockValid && priceValid));
+            }
+
+            $("#categorySelect").change(function () {
+                let category = $(this).val();
+
+                if (category) {
+                    $.get(`/addproduct/${category}/${cif}`, function (products) {
+                        let productSelect = $("#productSelect");
+                        productSelect.empty().append('<option value="">Seleccione un producto</option>');
+
+                        products.forEach(product => {
+                            productSelect.append(new Option(product.productName, product.productId));
+                        });
+
+                        productSelect.prop("disabled", false);
+                    }).fail(function (error) {
+                        console.error("Error al obtener los productos:", error);
+                    });
+                } else {
+                    $("#productSelect").empty().prop("disabled", true);
+                    $("#addProductButton").prop("disabled", true);
+                }
+            });
+
+            $("#productSelect, #stockInput, #priceInput").on("change input", checkButtonState);
+        });
+    </script>
+</div>
+</body>
+</html>
