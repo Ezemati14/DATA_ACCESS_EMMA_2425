@@ -1,5 +1,6 @@
 package org.emma.unit5.apimarketemma.service;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.emma.unit5.apimarketemma.model.dao.ISellersDAO;
 import org.emma.unit5.apimarketemma.model.dto.SellerDTO;
@@ -9,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SellersService {
@@ -22,10 +23,12 @@ public class SellersService {
         return (List<Seller>) sellersDAO.findAll();
     }
 
-    /**Obtener un seller mediante un cif
+    /**
+     * Obtener un seller mediante un cif
      * public Seller getSellerByCif(String cif){
-        return sellersDAO.findByCif(cif);
-    } **/
+     * return sellersDAO.findByCif(cif);
+     * }
+     **/
 
     public Seller findByCifAndPlainPassword(String cif, String plainPassword) {
         System.out.println("CIF: " + cif + " Password: " + plainPassword);

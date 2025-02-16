@@ -55,34 +55,4 @@ public class SellersController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ERROR: " + e.getMessage());
         }
     }
-
-    /**@PutMapping("/sellers/{id}")
-    public ResponseEntity<Seller> updateSellerNotD(
-            @PathVariable Integer id,
-            @RequestBody Seller updatedSellerData) {
-        Seller updatedSeller = sellersService.updateSellerNotDto(id, updatedSellerData);
-        return ResponseEntity.ok(updatedSeller);
-    } **/
-
-    /**
-     * Funcion para obtener el usuaurio por cif
-     @GetMapping("/{cif}")
-     public ResponseEntity<Seller> getSellerByCIF(@PathVariable("cif") String cif) {
-     Seller seller = sellersService.getSellerByCif(cif);
-
-     if(seller == null) {
-     return ResponseEntity.notFound().build();
-     }
-     return ResponseEntity.ok(seller);
-     } **/
-
-   /** @DeleteMapping("/seller/{id}")
-    public ResponseEntity<String> deleteSeller(@PathVariable Integer id) {
-        boolean deleted = sellersService.deleteSeller(id);
-        if(deleted) {
-            return ResponseEntity.ok("The seller was deleted! " + id);
-        }else {
-            return ResponseEntity.notFound().build();
-        }
-    } **/
 }

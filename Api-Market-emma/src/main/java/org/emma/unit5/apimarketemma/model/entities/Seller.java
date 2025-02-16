@@ -61,6 +61,13 @@ public class Seller {
     @Column(name = "url")
     private String url;
 
+    public Seller(int i, String a12345678, String johnDoe, String businessOne, String number, String mail, String password, String hashedPassword, boolean b, String url) {
+    }
+
+    public Seller() {
+
+    }
+
     public Integer getSellerId() {
         return id;
     }

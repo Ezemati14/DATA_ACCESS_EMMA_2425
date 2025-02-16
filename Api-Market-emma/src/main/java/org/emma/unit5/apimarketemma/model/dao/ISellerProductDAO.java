@@ -1,5 +1,6 @@
 package org.emma.unit5.apimarketemma.model.dao;
 
+import jakarta.transaction.Transactional;
 import org.emma.unit5.apimarketemma.model.entities.Product;
 import org.emma.unit5.apimarketemma.model.entities.Seller;
 import org.emma.unit5.apimarketemma.model.entities.SellerProduct;

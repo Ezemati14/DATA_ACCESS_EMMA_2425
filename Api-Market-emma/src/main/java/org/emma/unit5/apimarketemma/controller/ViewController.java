@@ -10,6 +10,7 @@ import org.emma.unit5.apimarketemma.model.entities.Product;
 import org.emma.unit5.apimarketemma.model.entities.Seller;
 import org.emma.unit5.apimarketemma.model.entities.SellerProduct;
 import org.emma.unit5.apimarketemma.service.ProductsService;
+import org.emma.unit5.apimarketemma.service.SellerProductService;
 import org.emma.unit5.apimarketemma.service.SellersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,6 +38,8 @@ public class ViewController {
     private IProductsDAO productsDAO;
     @Autowired
     private ISellerProductDAO sellerProductDAO;
+    @Autowired
+    private SellerProductService sellerProductService;
     @Autowired
     private ICategorysDAO categorysDAO;
     @Autowired
@@ -118,7 +121,7 @@ public class ViewController {
     }
 
     @GetMapping("/offer")
-    public String showOfferPage(Model model) {
+    public String showOfferPage(@RequestParam(value = "productId", required = false) Integer productId, Model model) {
         //Obtenemos el cif del vendedor autenticado
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String sellerCif = authentication.getName();
@@ -129,25 +132,58 @@ public class ViewController {
 
         List<Product> products = new ArrayList<>();
         Map<Integer, BigDecimal> productPrices = new HashMap<>();
+        Map<Integer, Boolean> productActiveStatus = new HashMap<>();
 
         for (SellerProduct sellerProduct : sellerProducts) {
             Product product = sellerProduct.getProduct();
             products.add(product);
             productPrices.put(product.getProductId(), sellerProduct.getPrice());
+            productActiveStatus.put(product.getProductId(), product.getActive());
+        }
+
+        SellerProduct selectedProduct = null;
+        if (productId != null) {
+            Optional<SellerProduct> sellerProductOpt = sellerProductDAO.findById(productId);
+            if (sellerProductOpt.isPresent()) {
+                selectedProduct = sellerProductOpt.get();
+            }
         }
 
         // Pasar los datos al modelo
         model.addAttribute("products", products);
         model.addAttribute("productPrices", productPrices);
+        model.addAttribute("productActiveStatus", productActiveStatus);
+        model.addAttribute("selectedProduct", selectedProduct);
 
         return "offer";
+    }
+
+    @GetMapping("/check-offer/{productId}")
+    @ResponseBody
+    public ResponseEntity<?> checkExistingOffer(@PathVariable Integer productId) {
+        Optional<SellerProduct> sellerProductOpt = sellerProductDAO.findById(productId);
+
+        if (sellerProductOpt.isPresent()) {
+            SellerProduct sellerProduct = sellerProductOpt.get();
+            if (sellerProduct.getOfferStartDate() != null && sellerProduct.getOfferEndDate() != null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("exists", true);
+                response.put("startDate", sellerProduct.getOfferStartDate());
+                response.put("endDate", sellerProduct.getOfferEndDate());
+                response.put("offerPrice", sellerProduct.getOfferPrice());
+                return ResponseEntity.ok(response);
+            }
+        }
+        return ResponseEntity.ok(Collections.singletonMap("exists", false));
     }
 
     @PostMapping("/create-offer")
     public Object createOffer(
             @RequestParam Integer productId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate offerStartDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate offerEndDate, RedirectAttributes redirectAttributes) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate offerEndDate,
+            @RequestParam(required = false) Boolean updateExisting,
+            RedirectAttributes redirectAttributes) {
 
         SellerProduct sellerProduct = sellerProductDAO.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
@@ -157,13 +193,22 @@ public class ViewController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para crear una oferta.");
         }
-
-        boolean conflict = sellerProductDAO.existsByProductIdAndOfferPeriod(productId, offerStartDate, offerEndDate);
+        // Verificar si ya existe una oferta para este producto
+        if (sellerProduct.getOfferStartDate() != null && sellerProduct.getOfferEndDate() != null) {
+            if (updateExisting == null) {
+                redirectAttributes.addFlashAttribute("confirmUpdate", true);
+                return "redirect:/offer"; // Preguntar si quiere actualizar
+            } else if (!updateExisting) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Oferta no actualizada.");
+                return "redirect:/offer";
+            }
+        }
+       /** boolean conflict = sellerProductDAO.existsByProductIdAndOfferPeriod(productId, offerStartDate, offerEndDate);
         if (conflict) {
             redirectAttributes.addFlashAttribute("errorMessage", "Ya existe una oferta para este producto en el periodo seleccionado.");
             return "redirect:/offer";
             //return ResponseEntity.badRequest().body("Ya existe una oferta para este producto en el periodo seleccionado.");
-        }
+        }**/
 
         BigDecimal originalPrice = sellerProduct.getPrice();
         long days = ChronoUnit.DAYS.between(offerStartDate, offerEndDate) + 1;
@@ -188,8 +233,8 @@ public class ViewController {
         sellerProduct.setOfferStartDate(offerStartDate);
         sellerProduct.setOfferEndDate(offerEndDate);
         sellerProduct.setOfferPrice(offerPrice);
-
         sellerProductDAO.save(sellerProduct);
+
         redirectAttributes.addFlashAttribute("successMessage", "Oferta creada con éxito. Precio con descuento: " + offerPrice);
         return "redirect:/offer";
         //return ResponseEntity.ok("Oferta creada con éxito. Precio con descuento: " + offerPrice);

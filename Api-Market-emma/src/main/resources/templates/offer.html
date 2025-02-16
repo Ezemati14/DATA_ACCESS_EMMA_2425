@@ -26,7 +26,7 @@
         <option value="" disabled selected>Selecciona un producto</option>
         <option th:each="product : ${products}"
                 th:value="${product.productId}"
-                th:attr="data-price=${productPrices[product.productId]}"
+                th:attr="data-price=${productPrices[product.productId]},data-active=${productActiveStatus[product.productId]}"
                 th:text="${product.productName}">
             </option>
     </select>
@@ -37,6 +37,7 @@
     <label for="endDate">Fecha de Fin:</label>
     <input type="date" id="endDate" name="offerEndDate" required />
 
+    <p>Precio original: <span id="originalPrice">-</span>€</p>
     <p>Precio con descuento: <span id="calculatedOfferPrice">-</span>€</p>
 
     <button type="submit">Crear Oferta</button>
@@ -49,25 +50,40 @@
         const startDateInput = document.getElementById("startDate");
         const endDateInput = document.getElementById("endDate");
         const calculatedOfferPrice = document.getElementById("calculatedOfferPrice");
+        const originalPriceSpan = document.getElementById("originalPrice");
         const messageContainer = document.getElementById("messageContainer");
+        const offerForm = document.getElementById("offerForm");
 
+        let existingOffer = false;
+
+        // Función para establecer la fecha mínima en hoy
+        function setMinDate() {
+            const today = new Date().toISOString().split("T")[0];
+            startDateInput.min = today;
+            endDateInput.min = today;
+        }
+
+        setMinDate();
+
+        // Función para calcular el precio con descuento
         function calculateDiscountedPrice() {
-            const selectedProduct = productDropdown.selectedOptions[0]; // Producto seleccionado
+            const selectedProduct = productDropdown.selectedOptions[0];
             if (!selectedProduct || !startDateInput.value || !endDateInput.value) {
                 calculatedOfferPrice.textContent = "-";
                 return;
             }
 
-            const originalPrice = parseFloat(selectedProduct.getAttribute("data-price")); // Precio original del producto
+            const originalPrice = parseFloat(selectedProduct.getAttribute("data-price"));
             if (isNaN(originalPrice)) {
                 calculatedOfferPrice.textContent = "-";
                 return;
             }
 
+            originalPriceSpan.textContent = originalPrice.toFixed(2) + "€";
+
             const startDate = new Date(startDateInput.value);
             const endDate = new Date(endDateInput.value);
-            const timeDiff = endDate - startDate;
-            const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1; // Calcula días incluyendo el último día
+            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
 
             let discountPercentage;
             if (days === 1) discountPercentage = 50;
@@ -76,34 +92,81 @@
             else if (days <= 15) discountPercentage = 15;
             else if (days <= 30) discountPercentage = 10;
             else {
-                //calculatedOfferPrice.textContent = "Error: Máximo 30 días";
                 messageContainer.textContent = "Error: Máximo 30 días";
                 return;
             }
 
             const discountAmount = (originalPrice * discountPercentage) / 100;
-            const offerPrice = (originalPrice - discountAmount).toFixed(2); // Aplica el descuento y redondea a 2 decimales
-
-            calculatedOfferPrice.textContent = offerPrice + "€"; // Muestra el precio con descuento
+            const offerPrice = (originalPrice - discountAmount).toFixed(2);
+            calculatedOfferPrice.textContent = offerPrice + "€";
         }
 
+        // Validar fechas
         startDateInput.addEventListener("change", function () {
             if (endDateInput.value && endDateInput.value < startDateInput.value) {
-                endDateInput.value = startDateInput.value; // Ajustar la fecha de fin si es menor
+                endDateInput.value = startDateInput.value;
             }
-            endDateInput.min = startDateInput.value; // Restringir fechas menores en fecha fin
+            endDateInput.min = startDateInput.value;
+        });
+
+        startDateInput.addEventListener("change", function () {
+            endDateInput.min = startDateInput.value;
         });
 
         endDateInput.addEventListener("change", function () {
             if (endDateInput.value < startDateInput.value) {
                 messageContainer.textContent = "La fecha de fin no puede ser anterior a la fecha de inicio.";
-                endDateInput.value = startDateInput.value; // Reajustar si es inválida
+                endDateInput.value = startDateInput.value;
             }
         });
 
-        productDropdown.addEventListener("change", calculateDiscountedPrice);
+        // Verifica si el producto ya tiene una oferta activa usando Thymeleaf
+        productDropdown.addEventListener("change", function () {
+            calculateDiscountedPrice();
+            const selectedProduct = productDropdown.selectedOptions[0];
+            const hasActiveOffer = selectedProduct.getAttribute("data-active") === "true";
+
+            if (hasActiveOffer) {
+                existingOffer = true;
+                messageContainer.innerHTML = `
+                    <p style="color: orange;">
+                        Este producto ya tiene una oferta activa. <br>
+                        Si continúas, se actualizará.
+                    </p>`;
+            } else {
+                existingOffer = false;
+                messageContainer.innerHTML = "";
+            }
+        });
+
         startDateInput.addEventListener("input", calculateDiscountedPrice);
         endDateInput.addEventListener("input", calculateDiscountedPrice);
+
+        // Validar antes de enviar el formulario
+        offerForm.addEventListener("submit", function (event) {
+            const selectedProduct = productDropdown.value;
+
+            if (!selectedProduct) {
+                alert("Por favor, selecciona un producto.");
+                event.preventDefault();
+                return;
+            }
+
+            if (existingOffer) {
+                const userConfirmed = confirm("Este producto ya tiene una oferta. ¿Deseas actualizarla?");
+                if (!userConfirmed) {
+                    event.preventDefault();
+                } else {
+                    // Agregar un input oculto para indicar actualización
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "updateExisting";
+                    input.value = "true";
+                    offerForm.appendChild(input);
+                }
+            }
+        });
+
     });
 </script>
 
