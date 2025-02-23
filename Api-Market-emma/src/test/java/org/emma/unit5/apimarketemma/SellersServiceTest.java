@@ -76,6 +76,42 @@ class SellersServiceTest {
     }
 
     @Test
+    void testGetSellerByCif_NotFound() {
+        String cif = "Z99999999"; // CIF inexistente
+
+        when(sellersDAO.findByCif(cif)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            sellersService.findByCif(cif);
+        });
+
+        assertEquals("Seller not found", exception.getMessage());
+    }
+
+    @Test
+    void testGetSeller_InvalidData() {
+        String invalidCif = ""; // CIF vacío
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            sellersService.findByCif(invalidCif);
+        });
+
+        assertEquals("Invalid CIF", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateSeller_InvalidData() {
+        String cif = "A12345678";
+        SellerDTO invalidSellerDTO = new SellerDTO(); // Datos vacíos
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            sellersService.updateSeller(cif, invalidSellerDTO);
+        });
+
+        assertEquals("Invalid seller data", exception.getMessage());
+    }
+
+    @Test
     void testFindByCifAndPlainPassword_NotFound() {
         String cif = "A12345678";
         String password = "password";
@@ -120,11 +156,14 @@ class SellersServiceTest {
 
         when(sellersDAO.findByCif(cif)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             sellersService.updateSeller(cif, sellerDTO);
         });
 
         assertEquals("Seller not found", exception.getMessage());
+
+        verify(sellersDAO, times(1)).findByCif(cif); // Verifica que se llamó a findByCif
+        verify(sellersDAO, never()).save(any(Seller.class)); // Asegura que no se intentó guardar un vendedor inexistente
     }
 
     @Test

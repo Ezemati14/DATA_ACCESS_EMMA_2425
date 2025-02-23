@@ -1,6 +1,5 @@
 package org.emma.unit5.apimarketemma.service;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.emma.unit5.apimarketemma.model.dao.ISellersDAO;
 import org.emma.unit5.apimarketemma.model.dto.SellerDTO;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -38,6 +36,11 @@ public class SellersService {
 
     /**Metdo para actualizar datos de un vendedor**/
     public void updateSeller(String cif, SellerDTO sellerDTO) {
+
+        if (sellerDTO == null || sellerDTO.getCif() == null || sellerDTO.getCif().trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid seller data");
+        }
+
        Seller seller = sellersDAO.findByCif(cif)
                .orElseThrow(() -> new RuntimeException("Seller not found"));;
 
@@ -113,7 +116,15 @@ public class SellersService {
         return sellersDAO.save(seller);
     }
 
-  /**  public boolean deleteSeller(int id){
+    public Seller findByCif(String cif) {
+        if (cif == null || cif.trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid CIF");
+        }
+        return sellersDAO.findByCif(cif)
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+    }
+
+    /**  public boolean deleteSeller(int id){
         if(sellersDAO.existsById(id)){
             sellersDAO.deleteById(id);
             return true;

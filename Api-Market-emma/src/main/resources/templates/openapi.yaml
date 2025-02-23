@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: Sellers API
+  description: API para gestionar vendedores
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+paths:
+  /sellers:
+    get:
+      summary: Obtener todos los vendedores
+      operationId: getAllSellers
+      tags:
+        - Sellers
+      responses:
+        "200":
+          description: Lista de vendedores obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Seller"
+  /sellers/search:
+    get:
+      summary: Obtener vendedor por CIF y contraseña
+      operationId: getSellerByCifAndPassword
+      tags:
+        - Sellers
+      parameters:
+        - name: cif
+          in: query
+          required: true
+          schema:
+            type: string
+          description: CIF del vendedor
+        - name: plainPassword
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Contraseña del vendedor
+      responses:
+        "200":
+          description: Vendedor encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Seller"
+        "404":
+          description: Vendedor no encontrado
+  /sellers/seller/{cif}:
+    put:
+      summary: Actualizar un vendedor por CIF
+      operationId: updateSeller
+      tags:
+        - Sellers
+      parameters:
+        - name: cif
+          in: path
+          required: true
+          schema:
+            type: string
+          description: CIF del vendedor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SellerDTO"
+      responses:
+        "200":
+          description: Vendedor actualizado correctamente
+        "400":
+          description: Datos inválidos
+  /sellers/addseller:
+    post:
+      summary: Agregar un nuevo vendedor
+      operationId: addSeller
+      tags:
+        - Sellers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SellerDTO"
+      responses:
+        "201":
+          description: Vendedor creado correctamente
+        "400":
+          description: Error en la creación del vendedor
+components:
+  schemas:
+    Seller:
+      type: object
+      properties:
+        sellerId:
+          type: integer
+          example: 1
+        cif:
+          type: string
+          example: "A12345678"
+        name:
+          type: string
+          example: "John Doe"
+        businessName:
+          type: string
+          example: "Business One"
+        phone:
+          type: string
+          example: "123456789"
+        email:
+          type: string
+          example: "john@example.com"
+        url:
+          type: string
+          example: "http://example.com"
+    SellerDTO:
+      type: object
+      properties:
+        cif:
+          type: string
+        name:
+          type: string
+        businessName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        plainPassword:
+          type: string
+        pro:
+          type: boolean
+        url:
+          type: string
