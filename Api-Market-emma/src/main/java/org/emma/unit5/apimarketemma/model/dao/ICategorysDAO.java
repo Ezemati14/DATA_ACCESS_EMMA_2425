@@ -12,4 +12,11 @@ public interface ICategorysDAO extends CrudRepository<Category, Integer> {
     List<String> findAllCategoryName();
 
     List<Category> findAll();
+
+    /** METODOS BASICOS DEL CRUD
+     * save(Product p) → Guarda un producto.
+     * findById(Integer id) → Busca por ID.
+     * findAll() → Obtiene todos los productos.
+     * delete(Product p) → Elimina un producto.
+     * **/
 }

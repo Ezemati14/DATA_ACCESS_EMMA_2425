@@ -10,6 +10,14 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "seller_products")
+@NamedNativeQuery(
+        name = "SellerProduct.findBySellerCifQuery",
+        query = "SELECT sp.seller_product_id, sp.seller_id, sp.product_id, sp.price, sp.offer_price, sp.offer_start_date, sp.offer_end_date, sp.stock " +
+                "FROM seller_products sp " +
+                "JOIN sellers s ON sp.seller_id = s.seller_id " +
+                "WHERE s.cif = :sellerCif",
+        resultClass = SellerProduct.class
+)
 public class SellerProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seller_products_id_gen")

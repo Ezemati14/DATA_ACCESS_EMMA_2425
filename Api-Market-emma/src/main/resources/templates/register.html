@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Registro de Seller</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <h2>Registro de Nuevo Seller</h2>
+
+    <!-- Mensajes de éxito o error -->
+    <p th:if="${successMessage}" style="color: green;" th:text="${successMessage}"></p>
+    <p th:if="${errorMessage}" style="color: red;" th:text="${errorMessage}"></p>
+    <!-- Cuando rellenamos los campos y le damos a enviar el object seller
+     toma tod0 olo que rellenamos, y lo envia por el metodo post que viaja
+     al viewControllar. Con el seller en el object los valores se asignan
+     automaticamente en el controlador-->
+    <form th:action="@{/register}" th:object="${seller}" method="post">
+      <label for="cif">CIF (Letra + 8 dígitos):</label>
+        <!--Cada th:field se asocia con el objeto seller que envia desde el controlado-->
+      <input type="text" id="cif" th:field="${seller.cif}" required pattern="^[A-Z][0-9]{8}$">
+
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" th:field="${seller.name}" required pattern="^[A-Za-z ]+$">
+
+      <label for="businessName">Nombre Comercial:</label>
+      <input type="text" id="businessName" th:field="${seller.businessName}" required pattern="^[A-Za-z ]+$">
+
+      <label for="phone">Teléfono:</label>
+      <input type="text" id="phone" th:field="${seller.phone}" required pattern="^[0-9]+$">
+
+      <label for="password">Contraseña:</label>
+      <input type="password" id="password" th:field="${seller.plainPassword}" required>
+
+      <button type="submit">Registrar Seller</button>
+    </form>
+
+    <br>
+    <a th:href="@{/login}">Volver al Login</a>
+
+</body>
+</html>

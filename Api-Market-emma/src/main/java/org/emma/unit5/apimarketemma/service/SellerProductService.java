@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.emma.unit5.apimarketemma.model.dao.ISellerProductDAO;
 import org.emma.unit5.apimarketemma.model.dao.ISellersDAO;
 import org.emma.unit5.apimarketemma.model.dto.SellerProductDTO;
+import org.emma.unit5.apimarketemma.model.entities.Product;
 import org.emma.unit5.apimarketemma.model.entities.Seller;
 import org.emma.unit5.apimarketemma.model.entities.SellerProduct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class SellerProductService {
 
     @Autowired
     ISellerProductDAO sellerProductDAO;
+
+    public void deleteProductById(Integer product) {
+        sellerProductDAO.deleteById(product);  // Eliminar el producto por ID
+    }
 
     public List<BigDecimal> getSellerNamesByOfferDates(LocalDate startDate, LocalDate endDate) {
         return sellerProductDAO.findOfferPriceByDates(startDate, endDate);
@@ -29,24 +35,11 @@ public class SellerProductService {
         return (List<SellerProduct>) sellerProductDAO.findAll();
     }
 
-    /** @Autowired
-    ISellersDAO sellersDAO;
-
-    public List<SellerProductDTO> getAllSellerProducts() {
-        List<SellerProduct> sellerProducts = (List<SellerProduct>) sellerProductDAO.findAll();
-        return sellerProducts.stream()
-                             .map(SellerProductDTO::new)
-                             .collect(Collectors.toList());
+    //Llama al DAO que se le paso una query
+    public List<SellerProduct> getSellerProductsByCif(String sellerCif) {
+        List<SellerProduct> products = sellerProductDAO.findBySellerCifQuery(sellerCif);
+        System.out.println("Seller Products: " + products);  // Verifica los productos obtenidos
+        return products;
     }
 
-    public List<SellerProductDTO> getSellerProductsBySellerName(String sellerName) {
-        Seller seller = sellersDAO.findByName(sellerName);
-        if(seller == null){
-            throw new IllegalArgumentException("Seller not found" + sellerName);
-        }
-        List<SellerProduct> sellerProducts = (List<SellerProduct>) sellerProductDAO.findBySeller(seller);
-        return sellerProducts.stream()
-                .map(SellerProductDTO::new)
-                .collect(Collectors.toList());
-    }**/
 }

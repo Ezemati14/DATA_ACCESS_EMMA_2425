@@ -82,6 +82,7 @@
                 <RowConstraints maxHeight="127.0" minHeight="10.0" prefHeight="45.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
+
                 <Label fx:id="label_cif" text="CIF:" textFill="#da1919">
                     <font>
                         <Font size="14.0" />
@@ -112,6 +113,7 @@
                         <Font size="14.0" />
                     </font>
                 </Label>
+                <!--Es un TextField donde se rellena el cif del seller-->
                 <TextField fx:id="tf_cif" disable="true" promptText="CIF" GridPane.columnIndex="1">
                     <font>
                         <Font size="14.0" />
@@ -151,6 +153,8 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
+                        <!--Tiene un onAction que llama a la funcion resetSeller
+                        de el controlador AppViewController-->
                         <Button fx:id="btn_cancel" alignment="CENTER" mnemonicParsing="false" onAction="#resetSeller" text="Reset" textAlignment="CENTER" underline="true" GridPane.columnIndex="1">
                             <font>
                                 <Font size="14.0" />
@@ -159,6 +163,8 @@
                                 <Insets bottom="10.0" left="30.0" right="30.0" top="10.0" />
                             </padding>
                         </Button>
+                        <!--Tiene un onAction que llama a la funcion callUpdate
+                        de el controlador AppViewController-->
                         <Button fx:id="btn_ok" alignment="CENTER" mnemonicParsing="false" onAction="#callUpdate" text="OK" textAlignment="CENTER" underline="true">
                             <font>
                                 <Font size="14.0" />

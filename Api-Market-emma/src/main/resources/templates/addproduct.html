@@ -4,7 +4,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Añadir Producto</title>
     <link rel="stylesheet" href="./style.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -12,13 +11,23 @@
     <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
     <a th:href="@{/welcome}">Ir a la Página de Inicio</a>
 
-    <!-- Formulario con método POST usando la clase existente -->
+    <!-- Formulario con métod0 POST
+     el th:object="${sellerProduct}" hacemos que thymleaf mapee los campos de esa clase
+     Esto quiere decir que los atributos name, estan asociados a esa clase
+     -->
     <form id="addProductForm" th:action="@{/addproduct/save}" th:object="${sellerProduct}" method="POST">
         <input type="hidden" name="cif" th:value="${seller.cif}">
 
         <label for="categorySelect">Seleccione una Categoría:</label>
         <select id="categorySelect">
             <option value="">Seleccione una categoría</option>
+            <!--
+            th:each -> recorre la lista categorias
+            th:value -> asigna el id como valor del option
+            th:text -> muestra el texto, en este caso el nombre
+            Aca nos llega la lista de categorias del modelo categories
+            Y usamos los campos que nos interese
+             -->
             <option th:each="category : ${categories}"
                     th:value="${category.categoryName}"
                     th:text="${category.categoryName}">
@@ -34,7 +43,11 @@
 
         <br><br>
 
+        <p id="productDesciption" style="font-style: italic; color: #555; margin-top: 10px;"></p>
+
         <label for="stockInput">Stock (máx. 20):</label>
+        <!-- Cuando el usuario introduce un stock, el name esta enlazado con el stock
+         esta enlazado con la clase selleProduct. Esto se pasa al ViewController-->
         <input type="number" id="stockInput" name="stock" min="1" max="20" value="1" required>
 
         <br><br>
@@ -48,41 +61,109 @@
     </form>
 
     <p th:if="${successMessage}" style="color: green;" th:text="${successMessage}"></p>
+
+    <!-- Mostrar los productos si existen -->
+    <h2>Productos añadidos</h2>
+    <table th:if="${sellerProducts != null and sellerProducts.size() > 0}">
+        <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Descuento</th>
+            <th>Accion</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sellerProduct : ${sellerProducts}">
+            <td th:text="${sellerProduct.product.productName}">Nombre del producto</td>
+            <td th:text="${sellerProduct.price}">Precio</td>
+            <td th:text="${sellerProduct.stock}">Stock</td>
+            <td th:text="${sellerProduct.offerPrice}">Precio de oferta</td>
+            <td><a th:href="@{/deleteProduct(productId=${sellerProduct.id})}" class="btn btn-danger">Eliminar</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Mensaje si no hay productos -->
+    <p th:unless="${sellerProducts != null and sellerProducts.size() > 0}" style="color: red;">
+        No hay productos añadidos para este vendedor.
+    </p>
+
     <script>
-        $(document).ready(function () {
-            let cif = "[[${seller.cif}]]";
+        //Nos aseguramos que tod0 el html este cargado
+        document.addEventListener("DOMContentLoaded", () => {
+            const cif = "[[${seller.cif}]]"; //Obtenemos el cif del vendedor desde thymleaf
+            const categorySelect = document.getElementById("categorySelect");//Referencia al despliegue de categoria
+            const productSelect = document.getElementById("productSelect");//Referencia al despliegue de producto
+            const stockInput = document.getElementById("stockInput");//campo donde se ingresa la cantidad
+            const priceInput = document.getElementById("priceInput");//ingresa precio
+            const addProductButton = document.getElementById("addProductButton");//boton de agregar
+            const productDesciption = document.getElementById("productDesciption");
+            let productsData = [];  // Guardará los productos obtenidos
+            //funcion para habilitar boton de envio
+            const checkButtonState = () => {
+                //Verifica si selecciono un prodcuto
+                const isProductSelected = productSelect.value !== "";
+                //Comprueba que el stock este entre 1 y 20
+                const stockValid = stockInput.value >= 1 && stockInput.value <= 20;
+                //revisa que el precio sea mayor que 0
+                const priceValid = priceInput.value > 0;
+                //Esto valida el boton si todas las de arriba son verdaderas
+                addProductButton.disabled = !(isProductSelected && stockValid && priceValid);
+            };
 
-            function checkButtonState() {
-                let isProductSelected = $("#productSelect").val() !== "";
-                let stockValid = $("#stockInput").val() >= 1 && $("#stockInput").val() <= 20;
-                let priceValid = $("#priceInput").val() > 0;
-
-                $("#addProductButton").prop("disabled", !(isProductSelected && stockValid && priceValid));
-            }
-
-            $("#categorySelect").change(function () {
-                let category = $(this).val();
-
+            categorySelect.addEventListener("change", async () => {
+                //Selecciona una categoria
+                const category = categorySelect.value;
+                productSelect.innerHTML = '<option value="">Seleccione un producto</option>';
+                productSelect.disabled = true;
+                productDesciption.textContent = ""; //Limpia descipcion
+                //Cuando hay una categoria selecciona
                 if (category) {
-                    $.get(`/addproduct/${category}/${cif}`, function (products) {
-                        let productSelect = $("#productSelect");
-                        productSelect.empty().append('<option value="">Seleccione un producto</option>');
-
-                        products.forEach(product => {
-                            productSelect.append(new Option(product.productName, product.productId));
+                    try {
+                        //Aca se realiza una peticion GET a /addproduct/${category}/${cif}
+                        //ejemplo /addproduct/Bebidas/B12345678.
+                        //y mientras espera la respuesta del servidor
+                        //De aca se pasa al ViewController
+                        const response = await fetch(`/addproduct/${category}/${cif}`);
+                        if (!response.ok) throw new Error("Error en la respuesta del servidor");
+                        //Cuando llega aca el response se convierte en un array de productos
+                        productsData = await response.json();
+                        //Con tod0 los productos se hace un forEach del array
+                        productsData.forEach(product => {
+                            //se crea una opcion por cada producto
+                            const option = document.createElement("option");
+                            //De esa option se obtiene el id
+                            option.value = product.productId;
+                            //y se muestra el texto , nombre del producto
+                            option.textContent = product.productName;
+                            //Esa option(producto) se rellena como opcion para seleccionar
+                            productSelect.appendChild(option);
                         });
 
-                        productSelect.prop("disabled", false);
-                    }).fail(function (error) {
+                        productSelect.disabled = false;
+                    } catch (error) {
                         console.error("Error al obtener los productos:", error);
-                    });
-                } else {
-                    $("#productSelect").empty().prop("disabled", true);
-                    $("#addProductButton").prop("disabled", true);
+                    }
                 }
+                checkButtonState();
+            });
+            //funcion para que cambie la descipcion del producto seleccionado
+            productSelect.addEventListener("change", () => {
+                //Seleccionamos el id del producto
+                const selectedProductId = parseInt(productSelect.value);
+                //buscamos que el productoId, sea igual al productoId seleccionado
+                const selectedProduct = productsData.find(product => product.productId === selectedProductId);
+                //Si encontramos el producto seleccionado que muestre la descipcion, si no que no muestre nada
+                productDesciption.textContent = selectedProduct ? selectedProduct.description : "";
+
+                checkButtonState();
             });
 
-            $("#productSelect, #stockInput, #priceInput").on("change input", checkButtonState);
+            [productSelect, stockInput, priceInput].forEach(element => {
+                element.addEventListener("input", checkButtonState);
+            });
         });
     </script>
 </div>

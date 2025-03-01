@@ -11,6 +11,8 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 @Table(name = "products")
 @NamedNativeQuery(
+        //y en esta parte llega la categoria Bebidas que se guarda en :categoryName
+        //y el cif que se guada en :sellerCif
         name = "Product.findMissingProductsBySellerAndCategory",
         query = "SELECT p.product_id, p.product_name, p.description, p.active, p.category_id " +
                 "FROM products p " +
@@ -23,6 +25,9 @@ import org.hibernate.annotations.ColumnDefault;
                 "    WHERE s.cif = :sellerCif " +
                 ")",
         resultClass = Product.class
+        //Si en un futuro agrego otro campo, actualizo la base de datos agregando ese campo
+        //Ejemplo p.brand, p.active, ...
+        //Luego en la clase Product añado ese campo
 )
 public class Product {
     @Id

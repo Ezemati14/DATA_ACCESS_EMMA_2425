@@ -7,7 +7,7 @@ body {
     text-align: center;
 }
 
-h1 {
+h1, h2 {
     color: #333;
     margin-bottom: 1em;
 }
@@ -28,7 +28,7 @@ label {
     text-align: left;
 }
 
-input {
+input, select {
     width: calc(100% - 1em);
     padding: 0.5em;
     margin-bottom: 1em;
@@ -44,38 +44,67 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 1em;
+    transition: background 0.3s;
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
-.error {
-    color: red;
-    margin-top: 1em;
+/* Estilos para la tabla */
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+td {
+    color: #333;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Botón eliminar */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background 0.3s;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* Mensajes de éxito y error */
+.success-message {
+    color: green;
     font-weight: bold;
 }
-input:disabled {
-    background-color: #f9f9f9;
-    color: #777;
-    border: 1px solid #ddd;
-}
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
 
-input[type="checkbox"] {
-    transform: scale(1.5);
-    margin-left: 1rem;
-}
-
-.error {
+.error-message {
     color: red;
-    font-size: 0.9rem;
-    margin-top: 4px;
+    font-weight: bold;
 }

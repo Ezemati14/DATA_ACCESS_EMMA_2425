@@ -24,6 +24,11 @@
 
     <select id="productDropdown" name="productId">
         <option value="" disabled selected>Selecciona un producto</option>
+        <!--
+            th:each -> recorre la lista produts
+            th:value -> asigna el id como valor del option
+            th:text -> muestra el texto, en este caso el nombre
+             -->
         <option th:each="product : ${products}"
                 th:value="${product.productId}"
                 th:attr="data-price=${productPrices[product.productId]},data-active=${productActiveStatus[product.productId]}"
@@ -44,66 +49,120 @@
 
 </form>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const productDropdown = document.getElementById("productDropdown");
-        const startDateInput = document.getElementById("startDate");
-        const endDateInput = document.getElementById("endDate");
-        const calculatedOfferPrice = document.getElementById("calculatedOfferPrice");
-        const originalPriceSpan = document.getElementById("originalPrice");
-        const messageContainer = document.getElementById("messageContainer");
-        const offerForm = document.getElementById("offerForm");
+<h2>Ofertas Actuales</h2>
+<!--Si no existe ninguna oferta, no se muestra nada -->
+<table th:if="${sellerOffers != null and sellerOffers.size() > 0}">
+    <thead>
+    <tr>
+        <th>Precio de Oferta</th>
+        <th>Fecha de Inicio</th>
+        <th>Fecha de Fin</th>
+        <th>Stock</th>
+        <th>Acción</th>
 
+    </tr>
+    </thead>
+    <tbody>
+    <!--Obtenemos el model del viewController que se llama sellerOffers
+    y a partir del offer mostramos los campos que nos interese-->
+    <tr th:each="offer : ${sellerOffers}">
+        <td th:text="${offer.offerPrice}">Precio</td>
+        <td th:text="${offer.offerStartDate}">Inicio</td>
+        <td th:text="${offer.offerEndDate}">Fin</td>
+        <td th:text="${offer.stock}">Stock</td>
+        <td>
+            <!-- Le pasamos al ViewController el id de la sellerProduct
+             para que lo busque y lo pueda eliminar-->
+            <a th:href="@{/deleteOffer(offerId=${offer.id})}" class="btn btn-danger">
+                Eliminar
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Mensaje si no hay productos -->
+<p th:unless="${sellerOffers != null and sellerOffers.size() > 0}" style="color: red;">
+    No hay ofertas para este vendedor
+</p>
+
+<script>
+    //Esto asegura que tod0 el html este cargado antes de ejcutar el html
+    //Esto se hace para que cuando no cargo una parte, no de errores
+    document.addEventListener("DOMContentLoaded", function () {
+        //Variables de elementos en el html para manejarlas
+        const productDropdown = document.getElementById("productDropdown");
+        const startDateInput = document.getElementById("startDate");//Inicio de la fecha
+        const endDateInput = document.getElementById("endDate");//Final de la fecha
+        const calculatedOfferPrice = document.getElementById("calculatedOfferPrice");//Calcular precio de la oferta
+        const originalPriceSpan = document.getElementById("originalPrice");//Precio original
+        const messageContainer = document.getElementById("messageContainer");
+        const offerForm = document.getElementById("offerForm"); //id del form de oferta
         let existingOffer = false;
 
         // Función para establecer la fecha mínima en hoy
+        //Esta funcion hace que no se eligan fechas pasadas
         function setMinDate() {
+            //Esta es la fecha de hoy
             const today = new Date().toISOString().split("T")[0];
+            //A estas fechas le estable un minimo, que es el de hoy
             startDateInput.min = today;
             endDateInput.min = today;
         }
-
         setMinDate();
 
         // Función para calcular el precio con descuento
         function calculateDiscountedPrice() {
+            //Seleccion un producto del despleagble
             const selectedProduct = productDropdown.selectedOptions[0];
+            //Si no se elige ningun producto, ni fecha de inicio, ni fecha final
+            //No muestra nada
             if (!selectedProduct || !startDateInput.value || !endDateInput.value) {
                 calculatedOfferPrice.textContent = "-";
                 return;
             }
 
+            //Elige el precio original del prodcuto, que el data-price lo obtengo
+            //del selecciona un producto,
             const originalPrice = parseFloat(selectedProduct.getAttribute("data-price"));
+            //Si el precio original es nan, no muestra nada
             if (isNaN(originalPrice)) {
                 calculatedOfferPrice.textContent = "-";
                 return;
             }
-
+            //Agarra el precio, y le agrega el precio, + el signo euro
+            //Para mostrarlo por pantalla
             originalPriceSpan.textContent = originalPrice.toFixed(2) + "€";
-
+            //Coje el valor del dato que se puso, y lo guarda en la variable startDate
             const startDate = new Date(startDateInput.value);
+            //Lo mismo, coje el valor de la fecha ingresada, y lo guarda en la variable endDate
             const endDate = new Date(endDateInput.value);
+            //Esta variable saca los dias entre una fecha y otra
             const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-
+            //Descuentoo del procentaje
             let discountPercentage;
+            //Hace las cuentas que segun cuantos dias, da cierto porcentaje
             if (days === 1) discountPercentage = 50;
             else if (days <= 3) discountPercentage = 30;
             else if (days <= 7) discountPercentage = 20;
             else if (days <= 15) discountPercentage = 15;
             else if (days <= 30) discountPercentage = 10;
+            //Si se excede de mas de 30 dias, muestra ese error
             else {
                 messageContainer.textContent = "Error: Máximo 30 días";
                 return;
             }
-
+            //Esto calcula el porcentaje, y lo muestra por pantalla
             const discountAmount = (originalPrice * discountPercentage) / 100;
             const offerPrice = (originalPrice - discountAmount).toFixed(2);
             calculatedOfferPrice.textContent = offerPrice + "€";
         }
 
-        // Validar fechas
+        // funcion para validar la fecha de inicio
         startDateInput.addEventListener("change", function () {
+            //Si el valor de la fecha es menor que el de la fecha de inicio
             if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                //Muestra por pantalla la fecha de hoy
                 endDateInput.value = startDateInput.value;
             }
             endDateInput.min = startDateInput.value;
@@ -112,7 +171,8 @@
         startDateInput.addEventListener("change", function () {
             endDateInput.min = startDateInput.value;
         });
-
+        //Esto es con la fecha de fin, si se pone una fecha que es menor a la de inicio
+        //Se muestra por msj eso, y se pone el valor de la fecha actual
         endDateInput.addEventListener("change", function () {
             if (endDateInput.value < startDateInput.value) {
                 messageContainer.textContent = "La fecha de fin no puede ser anterior a la fecha de inicio.";
@@ -122,12 +182,18 @@
 
         // Verifica si el producto ya tiene una oferta activa usando Thymeleaf
         productDropdown.addEventListener("change", function () {
+            //Llama a la funcion para calcular el precio
             calculateDiscountedPrice();
+            //Selecciona un prodcuto desplegable
             const selectedProduct = productDropdown.selectedOptions[0];
+            //Verifica si el campo de la tabla producto esta en true o false
+            //el data-active lo obtengo del selecciona un producto
             const hasActiveOffer = selectedProduct.getAttribute("data-active") === "true";
-
+            //Si esta activo, entra al if
             if (hasActiveOffer) {
+                //Existe la oferta, y pasa a true
                 existingOffer = true;
+                //Y muestra un desplegable con este mensaje
                 messageContainer.innerHTML = `
                     <p style="color: orange;">
                         Este producto ya tiene una oferta activa. <br>
@@ -138,22 +204,25 @@
                 messageContainer.innerHTML = "";
             }
         });
-
+        //Esto hace que cuando se vaya modificando las fechas, los precios vayan cambiando
         startDateInput.addEventListener("input", calculateDiscountedPrice);
         endDateInput.addEventListener("input", calculateDiscountedPrice);
 
         // Validar antes de enviar el formulario
         offerForm.addEventListener("submit", function (event) {
+            //Se guarda en esta variable la selccion del valor del producto
             const selectedProduct = productDropdown.value;
-
+            //Si no se selecciona producto, te envia un alert
+            //Y no envia el formulario
             if (!selectedProduct) {
                 alert("Por favor, selecciona un producto.");
                 event.preventDefault();
                 return;
             }
-
+            //Si existe la oferta, aparece un msj para confirma si quiere actualizar.
             if (existingOffer) {
                 const userConfirmed = confirm("Este producto ya tiene una oferta. ¿Deseas actualizarla?");
+                //Si no se confirma, no hace nada
                 if (!userConfirmed) {
                     event.preventDefault();
                 } else {

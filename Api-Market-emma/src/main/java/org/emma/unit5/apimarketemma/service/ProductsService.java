@@ -27,25 +27,32 @@ public class ProductsService {
     private ISellersDAO sellersDAO;
     @Autowired
     private ISellerProductDAO sellerProductsDAO;
-
-
+    //Llamamos a la funcion del DAO, y le pasamos por paramtros en nombre de categoria y cif
+    //Esta funcion luego se llama de el ViewController
     public List<Product> getMissingProducts(String categoryName, String sellerCif) {
+        //Aca llega bebidas y B12345678
         return productsDAO.findMissingProductsBySellerAndCategory(sellerCif, categoryName);
     }
 
-    public void addProductToSeller(String sellerCif, Integer productId, Integer stock, BigDecimal price) {
+    //Si llego agregar un campo nuevo, no haria falta de agregar nada, ya que
+    //en el metodo de arriba, maneja ese campo
 
+    //Stock pasa a valer 15, que fue lo que puso el usuario en el input
+    public void addProductToSeller(String sellerCif, Integer productId, Integer stock, BigDecimal price) {
+        //Busca al vendedor seller
         Seller seller = sellersDAO.findByCif(sellerCif)
                 .orElseThrow(() -> new RuntimeException("Seller no encontrado"));
+        //Busca al producto con el productId
         Product product = productsDAO.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
         SellerProduct sellerProduct = new SellerProduct();
         sellerProduct.setSeller(seller);
         sellerProduct.setProduct(product);
+        //stock que vale 15, con el set se establece ese 15, en el campo del sellerProduct stock
         sellerProduct.setStock(stock);
         sellerProduct.setPrice(price);
-
+        //Y finaliza que con el save, se guarda los datos en la base de datos
         sellerProductsDAO.save(sellerProduct);
     }
     public List<String> getAllProductsNames() {

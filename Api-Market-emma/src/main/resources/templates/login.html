@@ -28,6 +28,10 @@
     <button type="submit">Iniciar Sesión</button>
 </form>
 
+<a th:href="@{/register}">
+    <button type="button" class="btn btn-primary">Crear nuevo Seller</button>
+</a>
+
 <!-- Mostrar mensaje de error si hay algún problema -->
 <div th:if="${error}">
     <p th:text="${error}" style="color: red;"></p>

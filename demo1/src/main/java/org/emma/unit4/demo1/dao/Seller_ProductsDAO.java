@@ -44,19 +44,22 @@ public class Seller_ProductsDAO {
             e.printStackTrace();
         }
     }
-
+    //Por parametro se pasa el id del seller, y id del producto
     public static SellerProduct getFromSellerAndProduct(int sellerId, int productId){
-        SellerProduct sellerProducts = new SellerProduct();
+        SellerProduct sellerProducts = new SellerProduct(); //Aca almacenamos el resultado
         try {
-            connectionOpen();
+            connectionOpen();//Abrimos la conexion
             session.beginTransaction();
-
+            //Esta consulta busca los sellerProduct que coincidan con productId
+            //Los parametros q se pasaron a esta funcion, se ingresan aca
             String hql = "SELECT sp FROM SellerProduct sp WHERE sp.product.id = :productId AND sp.seller.sellerId = :sellerId";
             sellerProducts = (SellerProduct) session.createQuery(hql)
+                    //El valor del productId se asigna a :productId
                     .setParameter("productId", productId)
+                    //el valor de sellerId, se asigna a :sellerId
                     .setParameter("sellerId", sellerId)
-                    .uniqueResult();
-
+                    .uniqueResult();//Si no se encuentra ningun registra, returna null
+            //Si tod0 esta correcto los cambios se guardan en la base de datos
             session.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,6 +74,7 @@ public class Seller_ProductsDAO {
         try {
             connectionOpen();
             session.beginTransaction();
+            //Actualizamos el objeto en la base de datos
             session.update(seller_products);
             session.getTransaction().commit();
             return seller_products;

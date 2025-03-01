@@ -50,6 +50,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
+
                         <Label fx:id="label_user" text="User:">
                             <font>
                                 <Font size="14.0" />
@@ -59,16 +60,20 @@
                                 <Font size="14.0" />
                             </font>
                         </Label>
+                        <!--Los fx:id luego se vinculan con el controlador LoginController-->
                         <PasswordField fx:id="field_pwd" promptText="Please, enter the password of the seller" GridPane.columnIndex="1" GridPane.rowIndex="1">
                             <font>
                                 <Font size="14.0" />
                             </font></PasswordField>
+                        <!--Lo que escriba el usuario, luego en el controlador se podra usar-->
                         <TextField fx:id="field_user" promptText="Please, enter the CIF of the seller" GridPane.columnIndex="1">
                             <font>
                                 <Font size="14.0" />
-                            </font></TextField>
+                            </font>
+                        </TextField>
                     </children>
                 </GridPane>
+                <!--Este boton cuando se presiona, activa la funcion del LoginController-->
                 <Button fx:id="btn_login" mnemonicParsing="false" onAction="#checkForUser" text="Login" GridPane.rowIndex="4">
                     <padding>
                         <Insets bottom="8.0" left="30.0" right="30.0" top="8.0" />
