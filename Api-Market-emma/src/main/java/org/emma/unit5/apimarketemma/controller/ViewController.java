@@ -233,7 +233,7 @@ public class ViewController {
             //y la guardamos en una variable
             Product product = sellerProduct.getProduct();
             //Y el active lo pasamos a false
-            product.setActive(false);
+            product.setActive(Boolean.valueOf(false));
             //Con el save del DAO guardamos esos cambios
             productsDAO.save(product);
             //Y los cambios del precio de la oferta
@@ -285,7 +285,7 @@ public class ViewController {
         // Verificar si ya existe una oferta para este producto
         if (sellerProduct.getOfferStartDate() != null && sellerProduct.getOfferEndDate() != null) {
             if (updateExisting == null) {
-                redirectAttributes.addFlashAttribute("confirmUpdate", true);
+                redirectAttributes.addFlashAttribute("confirmUpdate", Optional.of(true));
                 return "redirect:/offer"; // Preguntar si quiere actualizar
             } else if (!updateExisting) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Oferta no actualizada.");
@@ -397,8 +397,29 @@ public class ViewController {
         //aca recibe esos 2 parametros bebidas y B12345678
         return productService.getMissingProducts(category, cif);
     }
+
+    /** ******************************* PAGINA DE PRODUCTOS ************************************* **/
+
+    @GetMapping("/createProduct")
+    public String showCreateProductPage(Model model) {
+        //Obtenemos todas las categorias con findAll
+        List<Category> categories = categorysDAO.findAll();
+        model.addAttribute("categories", categories);
+        model.addAttribute("product", new Product());
+        return "createProduct"; // Renderiza el HTML
+    }
+
+    @PostMapping("/createProduct")
+    public String createProduct(@ModelAttribute Product product, RedirectAttributes redirectAttributes) {
+        //Los datos que se pasan por el input, se guardan en el product del parametro
+        //y luego con la funcion del save, guardamos ese producto en la base de datos
+        //que esta asociada con el DAO de products
+        productsDAO.save(product);
+
+        // Mensaje de éxito
+        redirectAttributes.addFlashAttribute("successMessage", "Producto creado con éxito.");
+        return "redirect:/createProduct";
+    }
 }
-
-
 
 

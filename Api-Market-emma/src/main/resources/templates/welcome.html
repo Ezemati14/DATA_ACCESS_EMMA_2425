@@ -10,6 +10,7 @@
             <h1>Welcome, <span th:text="${seller.name}"></span>!</h1>
         <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
         <a th:href="@{/addproduct}">Ir a la Página de Productos</a>
+        <a th:href="@{/createProduct}">Ir a Crear Producto</a>
 
         <form id="updateForm" th:action="@{/welcome}" th:object="${seller}" method="post">
             <div>

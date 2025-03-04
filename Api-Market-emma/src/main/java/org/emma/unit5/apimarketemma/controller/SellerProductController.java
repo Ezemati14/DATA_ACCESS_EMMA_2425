@@ -31,13 +31,4 @@ public class SellerProductController {
         return sellerProductService.getSellerNamesByOfferDates(startDate, endDate);
     }
 
-   /** @GetMapping
-    public List<SellerProductDTO> getAllSellerProducts() {
-        return sellerProductService.getAllSellerProducts();
-    }
-
-    @GetMapping("/seller/{sellerName}")
-    public List<SellerProductDTO> getSellerProductsBySeller(@PathVariable String sellerName) {
-        return sellerProductService.getSellerProductsBySellerName(sellerName);
-    } **/
 }

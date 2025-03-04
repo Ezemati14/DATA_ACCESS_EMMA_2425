@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/register").permitAll()
                         .requestMatchers("/create-offer").hasRole("SELLER")
+                        .requestMatchers("/createProduct").hasRole("SELLER")
                         .requestMatchers("/addproduct").hasRole("SELLER")
                         // Any other request must be authenticated
                         .anyRequest().authenticated()

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Añadir Producto</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<h1>Crear un Nuevo Producto</h1>
+
+<a th:href="@{/offer}">Ir a la Página de Ofertas</a>
+<a th:href="@{/addproduct}">Ir a la Página de Productos</a>
+<a th:href="@{/welcome}">Ir a Crear Producto</a>
+
+<p th:if="${successMessage}" style="color: green;" th:text="${successMessage}"></p>
+
+<form th:action="@{/createProduct}" th:object="${product}" method="POST">
+    <label for="category">Categoría:</label>
+    <select id="category" name="category" required>
+        <option th:each="category : ${categories}"
+                th:value="${category.id}"
+                th:text="${category.categoryName}">
+        </option>
+    </select>
+
+    <!-- Nombre del Producto -->
+    <label for="productName">Nombre del Producto:</label>
+    <input type="text" id="productName" th:field="${product.productName}" required />
+
+    <!-- Descripción -->
+    <label for="description">Descripción:</label>
+    <textarea id="description" th:field="${product.description}"></textarea>
+
+    <!-- Estado (Activo o Inactivo) -->
+    <label for="active">Activo:</label>
+    <input type="checkbox" id="active" th:field="${product.active}" />
+
+    <button type="submit">Crear Producto</button>
+</form>
+
+</body>
+</html>
