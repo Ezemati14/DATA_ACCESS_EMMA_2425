@@ -1,0 +1,293 @@
+openapi: 3.0.3
+info:
+  description: API para gestionar productos de vendedores
+  title: Seller Products API
+  version: 1.0.0
+servers:
+- description: Servidor local
+  url: https://localhost:8080
+paths:
+  /seller-products:
+    get:
+      operationId: getAllSellerProducts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SellerProduct'
+                type: array
+          description: Lista de productos de vendedores obtenida correctamente
+      summary: Obtener todos los productos de vendedores
+      tags:
+      - Seller Products
+      x-accepts:
+      - application/json
+    post:
+      operationId: createSellerProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SellerProduct'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerProduct'
+          description: Producto creado correctamente
+        "400":
+          description: Datos inválidos
+      summary: Crear un nuevo producto
+      tags:
+      - Seller Products
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /seller-products/{id}:
+    delete:
+      operationId: deleteSellerProduct
+      parameters:
+      - description: ID del producto
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: Producto eliminado correctamente
+        "404":
+          description: Producto no encontrado
+      summary: Eliminar un producto por ID
+      tags:
+      - Seller Products
+      x-accepts:
+      - application/json
+    get:
+      operationId: getSellerProductById
+      parameters:
+      - description: ID del producto
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerProduct'
+          description: Producto encontrado
+        "404":
+          description: Producto no encontrado
+      summary: Obtener un producto por ID
+      tags:
+      - Seller Products
+      x-accepts:
+      - application/json
+    put:
+      operationId: updateSellerProduct
+      parameters:
+      - description: ID del producto
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SellerProduct'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerProduct'
+          description: Producto actualizado correctamente
+        "404":
+          description: Producto no encontrado
+        "400":
+          description: Datos inválidos
+      summary: Actualizar un producto por ID
+      tags:
+      - Seller Products
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /seller-products/by-cif/{cif}:
+    get:
+      operationId: getSellerProductsByCif
+      parameters:
+      - description: CIF del vendedor
+        explode: false
+        in: path
+        name: cif
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SellerProduct'
+                type: array
+          description: Lista de productos obtenida correctamente
+        "404":
+          description: Vendedor no encontrado
+      summary: Obtener productos de un vendedor por su CIF
+      tags:
+      - Seller Products
+      x-accepts:
+      - application/json
+  /seller-products/offers/{cif}:
+    get:
+      operationId: getOffersByCif
+      parameters:
+      - description: CIF del vendedor
+        explode: false
+        in: path
+        name: cif
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SellerProduct'
+                type: array
+          description: Lista de ofertas obtenida correctamente
+        "404":
+          description: Vendedor no encontrado
+      summary: Obtener ofertas activas de un vendedor por su CIF
+      tags:
+      - Seller Products
+      x-accepts:
+      - application/json
+  /seller-products/offer-date:
+    get:
+      operationId: getOfferDate
+      parameters:
+      - description: Fecha de inicio del rango
+        explode: true
+        in: query
+        name: startDate
+        required: true
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: Fecha de fin del rango
+        explode: true
+        in: query
+        name: endDate
+        required: true
+        schema:
+          format: date
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  format: double
+                  type: number
+                type: array
+          description: Lista de precios obtenida correctamente
+        "400":
+          description: Parámetros de fecha inválidos
+      summary: Obtener precios de productos por rango de fechas
+      tags:
+      - Seller Products
+      x-accepts:
+      - application/json
+  /seller-products/by-product-seller:
+    get:
+      operationId: getByProductAndSeller
+      parameters:
+      - description: ID del producto
+        explode: true
+        in: query
+        name: productId
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: ID del vendedor
+        explode: true
+        in: query
+        name: sellerId
+        required: true
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerProduct'
+          description: Producto encontrado
+        "404":
+          description: Producto no encontrado
+      summary: Obtener un producto por productId y sellerId
+      tags:
+      - Seller Products
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    SellerProduct:
+      example:
+        offerStartDate: 2023-01-01
+        sellerId: 1
+        productId: 1
+        price: 19.99
+        productName: Product One
+        offerEndDate: 2023-01-31
+      properties:
+        productId:
+          example: 1
+          type: integer
+        sellerId:
+          example: 1
+          type: integer
+        productName:
+          example: Product One
+          type: string
+        price:
+          example: 19.99
+          format: double
+          type: number
+        offerStartDate:
+          example: 2023-01-01
+          format: date
+          type: string
+        offerEndDate:
+          example: 2023-01-31
+          format: date
+          type: string
+      type: object
+

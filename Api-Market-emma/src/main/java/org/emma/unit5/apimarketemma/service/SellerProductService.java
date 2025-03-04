@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +41,33 @@ public class SellerProductService {
         List<SellerProduct> products = sellerProductDAO.findBySellerCifQuery(sellerCif);
         System.out.println("Seller Products: " + products);  // Verifica los productos obtenidos
         return products;
+    }
+
+    public Optional<SellerProduct> getSellerProductById(Integer id) {
+        return sellerProductDAO.findById(id);
+    }
+
+    public List<SellerProduct> getOffersByCif(String cif) {
+        return sellerProductDAO.findOffersByCif(cif);
+    }
+    public SellerProduct saveSellerProduct(SellerProduct sellerProduct) {
+        return sellerProductDAO.save(sellerProduct);
+    }
+
+    public Optional<SellerProduct> updateSellerProduct(Integer id, SellerProduct updatedProduct) {
+        return sellerProductDAO.findById(id).map(existingProduct -> {
+            existingProduct.setProduct(updatedProduct.getProduct());
+            existingProduct.setSeller(updatedProduct.getSeller());
+            existingProduct.setPrice(updatedProduct.getPrice());
+            existingProduct.setOfferPrice(updatedProduct.getOfferPrice());
+            existingProduct.setOfferStartDate(updatedProduct.getOfferStartDate());
+            existingProduct.setOfferEndDate(updatedProduct.getOfferEndDate());
+            return sellerProductDAO.save(existingProduct);
+        });
+    }
+
+    public Optional<SellerProduct> getByProductIdAndSellerId(Integer productId, Integer sellerId) {
+        return sellerProductDAO.findByProductIdAndSellerId(productId, sellerId);
     }
 
 }
