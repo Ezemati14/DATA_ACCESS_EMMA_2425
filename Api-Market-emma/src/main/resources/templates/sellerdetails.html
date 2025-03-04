@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="container">
+
+    <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
+    <a th:href="@{/welcome}">Volver a Welcome</a>
+    <a th:href="@{/addproduct}">Ir a la Página de Productos</a>
+    <a th:href="@{/showproducts}">Ir a SHOW PRODUCTS</a>
+    <a th:href="@{/showsellers}">Ir a SHOW SELLERS</a>
+
+    <h2>Productos añadidos</h2>
+    <table th:if="${sellerProducts != null and sellerProducts.size() > 0}">
+        <thead>
+        <tr>
+            <th>Cif del seller</th>
+            <th>Descripcion</th>
+            <th>Eliminar producto</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sellerProduct : ${sellerProducts}">
+            <td th:text="${sellerProduct.seller.cif}">Cif del seller</td>
+            <td th:text="${sellerProduct.product.getDescription()}">Stock</td>
+            <td><a th:href="@{/deleteProduct(productId=${sellerProduct.id})}" class="btn btn-danger">Eliminar</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

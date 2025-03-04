@@ -38,6 +38,8 @@ public class ViewController {
     @Autowired
     private ISellersDAO sellersDAO;
     @Autowired
+    private SellersService sellersService;
+    @Autowired
     private IProductsDAO productsDAO;
     @Autowired
     private ISellerProductDAO sellerProductDAO;
@@ -420,6 +422,56 @@ public class ViewController {
         redirectAttributes.addFlashAttribute("successMessage", "Producto creado con éxito.");
         return "redirect:/createProduct";
     }
+
+    /** ******************************* SELLER DETAILS ************************************* **/
+
+    @GetMapping("/sellerdetails")
+    public String detaills(Model model) {
+        String cif = getAuthenticatedUserCif();
+        Optional<Seller> seller = sellersDAO.findByCif(cif);
+        seller.ifPresent(s -> model.addAttribute("seller", s));
+
+        List<SellerProduct> sellerProducts = sellerProductService.getSellerProductsByCif(cif);
+        model.addAttribute("sellerProducts", sellerProducts);
+
+        return "/sellerdetails";
+    }
+
+    /** ******************************* SHOW PRODUCTS ************************************* **/
+
+    @GetMapping("/showproducts")
+    public String showProd(Model model) {
+        String cif = getAuthenticatedUserCif();
+        Optional<Seller> seller = sellersDAO.findByCif(cif);
+
+        seller.ifPresent(s -> model.addAttribute("seller", s));
+
+        List<SellerProduct> sellerProducts = sellerProductService.getSellerProductsByCif(cif);
+        model.addAttribute("sellerProducts", sellerProducts);
+
+        return "/showproducts";
+    }
+
+    /** ******************************* SHOW SELLERS ************************************* **/
+
+    @GetMapping("/showsellers")
+    public String showSelle(Model model, Authentication auth, RedirectAttributes redirectAttributes) {
+        String cif = auth.getName();
+        Optional<Seller> seller = sellersDAO.findByCif(cif);
+
+        // Verifica si el seller existe y si el CIF es "Z00000000"
+        if (seller.isPresent() && "Z00000000".equals(seller.get().getCif())) {
+            List<Seller> sellers = sellersService.getAllSellers();
+            model.addAttribute("sellers", sellers);
+            return "/showsellers";
+        } else {
+            // Si no tiene permisos, redirige con un mensaje de error
+            redirectAttributes.addFlashAttribute("usuarioSinPermiso", "No tiene permisos para ver esa información.");
+            return "redirect:/welcome";
+        }
+    }
+
 }
+
 
 

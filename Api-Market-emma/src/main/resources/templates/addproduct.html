@@ -10,7 +10,9 @@
     <h1>Bienvenido, <span th:text="${seller.name}"></span>!</h1>
     <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
     <a th:href="@{/welcome}">Ir a la Página de Inicio</a>
-    <a th:href="@{/createProduct}">Ir a Crear Producto</a>
+    <a th:href="@{/sellerdetails}">Ir a sellerdetails</a>
+    <a th:href="@{/showproducts}">Ir a showproducts</a>
+    <a th:href="@{/showsellers}">Ir a SHOW SELLERS</a>
 
     <!-- Formulario con métod0 POST
      el th:object="${sellerProduct}" hacemos que thymleaf mapee los campos de esa clase
@@ -63,7 +65,7 @@
 
     <p th:if="${successMessage}" style="color: green;" th:text="${successMessage}"></p>
 
-    <!-- Mostrar los productos si existen -->
+    <!-- Mostrar los productos si existen
     <h2>Productos añadidos</h2>
     <table th:if="${sellerProducts != null and sellerProducts.size() > 0}">
         <thead>
@@ -84,7 +86,7 @@
             <td><a th:href="@{/deleteProduct(productId=${sellerProduct.id})}" class="btn btn-danger">Eliminar</a></td>
         </tr>
         </tbody>
-    </table>
+    </table>-->
 
     <!-- Mensaje si no hay productos -->
     <p th:unless="${sellerProducts != null and sellerProducts.size() > 0}" style="color: red;">
