@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="container">
+
+    <a th:href="@{/offer}">Ir a la Página de Ofertas</a>
+    <a th:href="@{/welcome}">Ir a la Página de Inicio</a>
+    <a th:href="@{/sellerdetails}">Ir a sellerdetails</a>
+    <a th:href="@{/showsellers}">Ir a SHOW SELLERS</a>
+
+    <h1>Product List</h1>
+    <table th:if="${sellerProducts != null and sellerProducts.size() > 0}">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Precio</th>
+            <th>Category</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sellerProduct : ${sellerProducts}">
+            <td th:text="${sellerProduct.product.productName}">Nombre del producto</td>
+            <td th:text="${sellerProduct.price}">Precio</td>
+            <td th:text="${sellerProduct.product.category.getCategoryName()}">Category</td>
+            <!-- <td><a th:href="@{/deleteProduct(productId=${sellerProduct.id})}" class="btn btn-danger">Eliminar</a></td> -->
+        </tr>
+        </tbody>
+    </table>
+    <!-- Mensaje si no hay productos -->
+    <p th:unless="${sellerProducts != null and sellerProducts.size() > 0}" style="color: red;">
+        No hay productos añadidos para este vendedor.
+    </p>
+</div>
+</body>
+</html>

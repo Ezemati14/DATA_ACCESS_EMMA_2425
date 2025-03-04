@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Seller List</h1>
+
+  <a th:href="@{/welcome}">Volver a Welcome</a>
+  <a th:href="@{/addproduct}">Ir a la Página de Productos</a>
+  <a th:href="@{/offer}">Ir a la Página de Productos</a>
+  <a th:href="@{/showproducts}">Ir a SHOW PRODUCTS</a>
+  <a th:href="@{/sellerdetails}">Ir a SHOW DETAILS</a>
+
+  <table class="table-container">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>CIF</th>
+      <th>Name</th>
+      <th>Email</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="seller : ${sellers}">
+      <td th:text="${seller.getSellerId()}">ID</td>
+      <td th:text="${seller.cif}">CIF</td>
+      <td th:text="${seller.name}">NAME</td>
+      <td th:text="${seller.email}">EMAIL</td>
+    </tr>
+    </tbody>
+    </thead>
+  </table>
+</div>
+</body>
+</html>
